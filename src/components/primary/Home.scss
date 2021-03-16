@@ -1,0 +1,16 @@
+.Home {
+  display: flex;
+
+  .Drawer {
+    width: 240px;
+    flex-shrink: 0;
+
+    .MenuButton {
+      margin-right: 16px;
+    }
+
+    .DrawerPaper {
+      width: 240px;
+    }
+  }
+}
