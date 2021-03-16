@@ -7,8 +7,10 @@ import reportWebVitals from "./reportWebVitals";
 import { Provider } from "react-redux";
 import store from "./rematch/store";
 
-var firebase = require("firebase");
-var app = firebase.initializeApp({});
+import firebase from "firebase/app";
+import "firebase/auth";
+import firebaseConfig from "./firebase";
+firebase.initializeApp(firebaseConfig);
 
 ReactDOM.render(
   <Provider store={store}>
