@@ -35,6 +35,9 @@ const theme = createMuiTheme({
 
 function LoginRegisterBtn(props) {
   const [open, setOpen] = React.useState(false);
+  const [email, setEmail] = React.useState("");
+  const [pass, setPass] = React.useState("");
+  const [errorText, setErrorText] = React.useState("");
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -42,6 +45,50 @@ function LoginRegisterBtn(props) {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const onEmailInput = (event) => {
+    setEmail(event.target.value);
+  };
+
+  const onPassInput = (event) => {
+    setPass(event.target.value);
+  };
+
+  const loginemail = (event) => {
+    firebase
+      .auth()
+      .createUserWithEmailAndPassword(email, pass)
+      .then(() => {
+        firebase
+          .auth()
+          .signInWithEmailAndPassword(email, pass)
+          .then((userCredential) => {
+            // var user = userCredential.user;
+            setOpen(false);
+          })
+          .catch((error) => {
+            // var errorCode = error.code;
+            const errorMessage = error.message;
+            setErrorText(errorMessage);
+          });
+      })
+      .catch((error) => {
+        if (error.code === "auth/email-already-in-use") {
+          firebase
+            .auth()
+            .signInWithEmailAndPassword(email, pass)
+            .then((userCredential) => {
+              // var user = userCredential.user;
+              setOpen(false);
+            })
+            .catch((error) => {
+              // var errorCode = error.code;
+              const errorMessage = error.message;
+              setErrorText(errorMessage);
+            });
+        }
+      });
   };
 
   return (
@@ -59,22 +106,36 @@ function LoginRegisterBtn(props) {
           <DialogContentText>
             If you don't own an account, begin typing an email to create one.
           </DialogContentText>
+          {errorText === "" ? null : <h1>{errorText}</h1>}
           <TextField
             color="secondary"
             autoFocus
             margin="dense"
-            id="name"
             label="Email Address"
             type="email"
             fullWidth
+            onInput={onEmailInput}
+            value={email}
           />
+          <TextField
+            color="secondary"
+            margin="dense"
+            label="Password"
+            type="password"
+            fullWidth
+            onInput={onPassInput}
+            value={pass}
+          />
+          <Typography variant="subtitle2" color="primary">
+            (other login methods will be added in a future update)
+          </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
+          <Button onClick={handleClose} color="secondary">
             Cancel
           </Button>
-          <Button onClick={handleClose} color="primary">
-            Subscribe
+          <Button onClick={loginemail} color="secondary">
+            Login
           </Button>
         </DialogActions>
       </Dialog>
@@ -91,6 +152,11 @@ function ProfMenu(props) {
   };
 
   const handleClose = () => {
+    setProfBtnAnchorEl(null);
+  };
+
+  const logOut = () => {
+    firebase.auth().signOut();
     setProfBtnAnchorEl(null);
   };
 
@@ -116,12 +182,17 @@ function ProfMenu(props) {
       >
         <MenuItem onClick={handleClose}>Profile</MenuItem>
         <MenuItem onClick={handleClose}>My account</MenuItem>
+        <MenuItem onClick={logOut}>Logout</MenuItem>
       </Menu>
     </div>
   );
 }
 
 function App(props) {
+  const [loggedIn, setLoggedIn] = React.useState(false);
+  firebase.auth().onAuthStateChanged((user) => {
+    setLoggedIn(!!user);
+  });
   return (
     <div className="App">
       <ThemeProvider theme={theme}>
@@ -157,11 +228,20 @@ function App(props) {
             >
               Skillwatch
             </Typography>
-            {firebase.auth().currentUser === null ? (
+            <div
+              className={clsx("LoginVisible", {
+                LoginInvisible: loggedIn,
+              })}
+            >
               <LoginRegisterBtn {...props} />
-            ) : (
+            </div>
+            <div
+              className={clsx("LoginVisible", {
+                LoginInvisible: !loggedIn,
+              })}
+            >
               <ProfMenu {...props} />
-            )}
+            </div>
           </Toolbar>
         </AppBar>
         <Router>

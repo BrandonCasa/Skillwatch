@@ -23,6 +23,13 @@
     transition: opacity 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
   }
 
+  .LoginVisible {
+    display: inherit;
+  }
+  .LoginInvisible {
+    display: none;
+  }
+
   .AppBar {
     flex-grow: 1;
     margin-left: 0px;
