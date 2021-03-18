@@ -16,11 +16,11 @@ import Typography from "@material-ui/core/Typography";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 
 import { Link } from "react-router-dom";
-import "./Home.scss";
+import "./Profile.scss";
 
-function Home(props) {
+function Profile(props) {
   return (
-    <div className="Home">
+    <div className="Profile">
       <Drawer
         className="Drawer"
         variant="persistent"
@@ -47,7 +47,7 @@ function Home(props) {
         </Toolbar>
         <Divider />
         <List>
-          <ListItem button key={"Home"} disabled={true} component={Link} to="/">
+          <ListItem button key={"Home"} component={Link} to="/">
             <ListItemIcon>
               <HomeIcon />
             </ListItemIcon>
@@ -75,10 +75,10 @@ function Home(props) {
           ContentClosed: !props.primaryDrawerOpen,
         })}
       >
-        Home
+        Profile
       </div>
     </div>
   );
 }
 
-export default Home;
+export default Profile;

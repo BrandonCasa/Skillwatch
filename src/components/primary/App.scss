@@ -1,6 +1,7 @@
 .App {
   flex-grow: 1;
   overflow: hidden;
+  height: 100%;
 
   .MenuButtonVisible {
     margin-right: 16px;
@@ -15,7 +16,7 @@
   .TitleVisible {
     flex-grow: 1;
     opacity: 1;
-    transition: opacity 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+    transition: opacity 225ms cubic-bezier(0.4, 0, 0.6, 1) 0ms;
   }
   .TitleInvisible {
     flex-grow: 1;
@@ -44,11 +45,11 @@
   .AppBarShift {
     flex-grow: 1;
     margin-left: 240px;
-    transition: margin-left 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+    transition: margin-left 225ms cubic-bezier(0.4, 0, 0.6, 1) 0ms;
 
-    .Toolbar {
+    .ToolbarShift {
       margin-right: 240px;
-      transition: margin-right 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+      transition: margin-right 225ms cubic-bezier(0.4, 0, 0.6, 1) 0ms;
     }
   }
 }

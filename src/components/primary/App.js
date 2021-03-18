@@ -6,7 +6,7 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
-import AccountCircle from "@material-ui/icons/AccountCircle";
+import SettingsIcon from "@material-ui/icons/Settings";
 import MenuItem from "@material-ui/core/MenuItem";
 import Menu from "@material-ui/core/Menu";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -22,10 +22,17 @@ import TextField from "@material-ui/core/TextField";
 import firebase from "firebase/app";
 import "firebase/auth";
 
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  useHistory,
+} from "react-router-dom";
 import "./App.scss";
 
 import HomeContainer from "../../containers/HomeContainer";
+import ProfileContainer from "../../containers/ProfileContainer";
+import MessagingContainer from "../../containers/MessagingContainer";
 
 const theme = createMuiTheme({
   palette: {
@@ -144,7 +151,12 @@ function LoginRegisterBtn(props) {
 }
 
 function ProfMenu(props) {
+  const history = useHistory();
+
   const [profBtnAnchorEl, setProfBtnAnchorEl] = React.useState(null);
+  const [toProfileAllowed, setToProfileAllowed] = React.useState(
+    !(history.location.pathname === "/account/profile")
+  );
   const profBtnOpen = Boolean(profBtnAnchorEl);
 
   const handleMenu = (event) => {
@@ -155,15 +167,31 @@ function ProfMenu(props) {
     setProfBtnAnchorEl(null);
   };
 
-  const logOut = () => {
-    firebase.auth().signOut();
+  const toProfile = () => {
     setProfBtnAnchorEl(null);
+    history.push("/account/profile");
   };
+
+  const logOut = () => {
+    setProfBtnAnchorEl(null);
+    firebase.auth().signOut();
+  };
+
+  history.listen((location, action) => {
+    if (action === "PUSH" && location.pathname === "/account/profile") {
+      setToProfileAllowed(false);
+    } else if (
+      action === "PUSH" &&
+      !(location.pathname === "/account/profile")
+    ) {
+      setToProfileAllowed(true);
+    }
+  });
 
   return (
     <div>
       <IconButton onClick={handleMenu} color="inherit">
-        <AccountCircle />
+        <SettingsIcon />
       </IconButton>
       <Menu
         id="menu-appbar"
@@ -180,8 +208,9 @@ function ProfMenu(props) {
         open={profBtnOpen}
         onClose={handleClose}
       >
-        <MenuItem onClick={handleClose}>Profile</MenuItem>
-        <MenuItem onClick={handleClose}>My account</MenuItem>
+        <MenuItem onClick={toProfile} disabled={!toProfileAllowed}>
+          Profile
+        </MenuItem>
         <MenuItem onClick={logOut}>Logout</MenuItem>
       </Menu>
     </div>
@@ -190,69 +219,77 @@ function ProfMenu(props) {
 
 function App(props) {
   const [loggedIn, setLoggedIn] = React.useState(false);
+
   firebase.auth().onAuthStateChanged((user) => {
     setLoggedIn(!!user);
   });
+
   return (
-    <div className="App">
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <AppBar
-          position="static"
-          className={clsx("AppBar", {
-            AppBarShift: props.primaryDrawerOpen,
-          })}
-        >
-          <Toolbar
-            className={clsx("Toolbar", {
-              ToolbarShift: props.primaryDrawerOpen,
+    <Router>
+      <div className="App">
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <AppBar
+            position="static"
+            className={clsx("AppBar", {
+              AppBarShift: props.primaryDrawerOpen,
             })}
           >
-            <IconButton
-              edge="start"
-              className={clsx("MenuButtonVisible", {
-                MenuButtonInvisible: props.primaryDrawerOpen,
-              })}
-              color="inherit"
-              onClick={() => {
-                props.setPrimaryDrawerOpen(true);
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography
-              variant="h6"
-              className={clsx("TitleVisible", {
-                TitleInvisible: props.primaryDrawerOpen,
+            <Toolbar
+              className={clsx("Toolbar", {
+                ToolbarShift: props.primaryDrawerOpen,
               })}
             >
-              Skillwatch
-            </Typography>
-            <div
-              className={clsx("LoginVisible", {
-                LoginInvisible: loggedIn,
-              })}
-            >
-              <LoginRegisterBtn {...props} />
-            </div>
-            <div
-              className={clsx("LoginVisible", {
-                LoginInvisible: !loggedIn,
-              })}
-            >
-              <ProfMenu {...props} />
-            </div>
-          </Toolbar>
-        </AppBar>
-        <Router>
+              <IconButton
+                edge="start"
+                className={clsx("MenuButtonVisible", {
+                  MenuButtonInvisible: props.primaryDrawerOpen,
+                })}
+                color="inherit"
+                onClick={() => {
+                  props.setPrimaryDrawerOpen(true);
+                }}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Typography
+                variant="h6"
+                className={clsx("TitleVisible", {
+                  TitleInvisible: props.primaryDrawerOpen,
+                })}
+              >
+                Skillwatch
+              </Typography>
+              <div
+                className={clsx("LoginVisible", {
+                  LoginInvisible: loggedIn,
+                })}
+              >
+                <LoginRegisterBtn {...props} />
+              </div>
+              <div
+                className={clsx("LoginVisible", {
+                  LoginInvisible: !loggedIn,
+                })}
+              >
+                <ProfMenu {...props} />
+              </div>
+            </Toolbar>
+          </AppBar>
           <Switch>
+            <Route path="/messaging">
+              <MessagingContainer />
+            </Route>
+            <Route path="/account/profile">
+              <ProfileContainer />
+            </Route>
             <Route path="/">
               <HomeContainer />
             </Route>
           </Switch>
-        </Router>
-      </ThemeProvider>
-    </div>
+        </ThemeProvider>
+      </div>
+    </Router>
   );
 }
 

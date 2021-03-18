@@ -14,13 +14,16 @@ import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
+import Paper from "@material-ui/core/Paper";
+import Avatar from "@material-ui/core/Avatar";
+import Grid from "@material-ui/core/Grid";
 
 import { Link } from "react-router-dom";
-import "./Home.scss";
+import "./Messaging.scss";
 
-function Home(props) {
+function Messaging(props) {
   return (
-    <div className="Home">
+    <div className="Messaging">
       <Drawer
         className="Drawer"
         variant="persistent"
@@ -47,7 +50,7 @@ function Home(props) {
         </Toolbar>
         <Divider />
         <List>
-          <ListItem button key={"Home"} disabled={true} component={Link} to="/">
+          <ListItem button key={"Home"} component={Link} to="/">
             <ListItemIcon>
               <HomeIcon />
             </ListItemIcon>
@@ -62,7 +65,13 @@ function Home(props) {
         </List>
         <Divider />
         <List>
-          <ListItem button key={"Messaging"} component={Link} to="/messaging">
+          <ListItem
+            button
+            key={"Messaging"}
+            disabled={true}
+            component={Link}
+            to="/messaging"
+          >
             <ListItemIcon>
               <GroupIcon />
             </ListItemIcon>
@@ -75,10 +84,45 @@ function Home(props) {
           ContentClosed: !props.primaryDrawerOpen,
         })}
       >
-        Home
+        <Grid container className="Grid">
+          <Grid item xs={9}>
+            <Paper className="GridPaper">
+              <Typography
+                style={{
+                  textAlign: "center",
+                  paddingTop: "20px",
+                  paddingBottom: "20px",
+                }}
+              >
+                Channel History
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={3}>
+            <Paper className="GridPaper">
+              <List>
+                <ListItem key={0}>
+                  <ListItemText
+                    primary={"Channels"}
+                    style={{ textAlign: "center" }}
+                  />
+                </ListItem>
+                <ListItem button key={1}>
+                  <ListItemIcon>
+                    <Avatar
+                      alt="Brandon Casamichana"
+                      src="/static/images/avatar/1.jpg"
+                    ></Avatar>
+                  </ListItemIcon>
+                  <ListItemText primary={"Brandon C."} />
+                </ListItem>
+              </List>
+            </Paper>
+          </Grid>
+        </Grid>
       </div>
     </div>
   );
 }
 
-export default Home;
+export default Messaging;
