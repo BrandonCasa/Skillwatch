@@ -17,6 +17,16 @@ import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import Paper from "@material-ui/core/Paper";
 import Avatar from "@material-ui/core/Avatar";
 import Grid from "@material-ui/core/Grid";
+import Badge from "@material-ui/core/Badge";
+import Button from "@material-ui/core/Button";
+import ButtonGroup from "@material-ui/core/ButtonGroup";
+import EmojiEmotionsIcon from "@material-ui/icons/EmojiEmotions";
+import CloudUploadIcon from "@material-ui/icons/CloudUpload";
+import TextField from "@material-ui/core/TextField";
+
+import firebase from "firebase/app";
+import "firebase/auth";
+import "firebase/messaging";
 
 import { Link } from "react-router-dom";
 import "./Messaging.scss";
@@ -86,7 +96,7 @@ function Messaging(props) {
       >
         <Grid container className="Grid">
           <Grid item xs={9}>
-            <Paper className="GridPaper">
+            <Paper className="ChannelHistory">
               <Typography
                 style={{
                   textAlign: "center",
@@ -96,10 +106,36 @@ function Messaging(props) {
               >
                 Channel History
               </Typography>
+              <div className="ChatHistory"></div>
+              <div className="ChatInputContainer">
+                <Paper className="ChatInput" elevation={3}>
+                  <TextField
+                    className="ChatInputField"
+                    label="Message"
+                    type="text"
+                    fullWidth
+                  />
+                </Paper>
+                <ButtonGroup
+                  variant="contained"
+                  color="primary"
+                  className="ChatInputControls"
+                >
+                  <Button className="Buttons">
+                    <CloudUploadIcon />
+                  </Button>
+                  <Button className="Buttons">
+                    <EmojiEmotionsIcon />
+                  </Button>
+                  <Button className="SendBtn" color="secondary">
+                    Send
+                  </Button>
+                </ButtonGroup>
+              </div>
             </Paper>
           </Grid>
           <Grid item xs={3}>
-            <Paper className="GridPaper">
+            <Paper className="MessageHistory">
               <List>
                 <ListItem key={0}>
                   <ListItemText
@@ -109,10 +145,12 @@ function Messaging(props) {
                 </ListItem>
                 <ListItem button key={1}>
                   <ListItemIcon>
-                    <Avatar
-                      alt="Brandon Casamichana"
-                      src="/static/images/avatar/1.jpg"
-                    ></Avatar>
+                    <Badge badgeContent={4} color="secondary">
+                      <Avatar
+                        alt="Brandon Casamichana"
+                        src="/static/images/avatar/1.jpg"
+                      />
+                    </Badge>
                   </ListItemIcon>
                   <ListItemText primary={"Brandon C."} />
                 </ListItem>

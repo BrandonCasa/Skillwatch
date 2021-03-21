@@ -18,9 +18,11 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import TextField from "@material-ui/core/TextField";
+import Divider from "@material-ui/core/Divider";
 
 import firebase from "firebase/app";
 import "firebase/auth";
+import "firebase/messaging";
 
 import {
   BrowserRouter as Router,
@@ -60,6 +62,20 @@ function LoginRegisterBtn(props) {
 
   const onPassInput = (event) => {
     setPass(event.target.value);
+  };
+
+  const signInWithGoogle = () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    return firebase
+      .auth()
+      .signInWithPopup(provider)
+      .then(() => {
+        setOpen(false);
+      })
+      .catch((error) => {
+        const errorMessage = error.message;
+        setErrorText(errorMessage);
+      });
   };
 
   const loginemail = (event) => {
@@ -143,6 +159,16 @@ function LoginRegisterBtn(props) {
           </Button>
           <Button onClick={loginemail} color="secondary">
             Login
+          </Button>
+        </DialogActions>
+        <Divider />
+        <DialogActions>
+          <Button
+            onClick={signInWithGoogle}
+            color="secondary"
+            variant="contained"
+          >
+            Login With Google
           </Button>
         </DialogActions>
       </Dialog>
