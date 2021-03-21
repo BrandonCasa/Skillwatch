@@ -16,13 +16,8 @@ import Typography from "@material-ui/core/Typography";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import Paper from "@material-ui/core/Paper";
 import Avatar from "@material-ui/core/Avatar";
-import Grid from "@material-ui/core/Grid";
 import Badge from "@material-ui/core/Badge";
-import Button from "@material-ui/core/Button";
-import ButtonGroup from "@material-ui/core/ButtonGroup";
-import EmojiEmotionsIcon from "@material-ui/icons/EmojiEmotions";
-import CloudUploadIcon from "@material-ui/icons/CloudUpload";
-import TextField from "@material-ui/core/TextField";
+import ListSubheader from "@material-ui/core/ListSubheader";
 
 import firebase from "firebase/app";
 import "firebase/auth";
@@ -94,70 +89,170 @@ function Messaging(props) {
           ContentClosed: !props.primaryDrawerOpen,
         })}
       >
-        <Grid container className="Grid">
-          <Grid item xs={9}>
-            <Paper className="ChannelHistory">
-              <Typography
-                style={{
-                  textAlign: "center",
-                  paddingTop: "20px",
-                  paddingBottom: "20px",
-                }}
-              >
-                Channel History
-              </Typography>
-              <div className="ChatHistory"></div>
-              <div className="ChatInputContainer">
-                <Paper className="ChatInput" elevation={3}>
-                  <TextField
-                    className="ChatInputField"
-                    label="Message"
-                    type="text"
-                    fullWidth
-                  />
-                </Paper>
-                <ButtonGroup
-                  variant="contained"
-                  color="primary"
-                  className="ChatInputControls"
-                >
-                  <Button className="Buttons">
-                    <CloudUploadIcon />
-                  </Button>
-                  <Button className="Buttons">
-                    <EmojiEmotionsIcon />
-                  </Button>
-                  <Button className="SendBtn" color="secondary">
-                    Send
-                  </Button>
-                </ButtonGroup>
-              </div>
-            </Paper>
-          </Grid>
-          <Grid item xs={3}>
-            <Paper className="MessageHistory">
-              <List>
-                <ListItem key={0}>
-                  <ListItemText
-                    primary={"Channels"}
-                    style={{ textAlign: "center" }}
-                  />
-                </ListItem>
-                <ListItem button key={1}>
-                  <ListItemIcon>
-                    <Badge badgeContent={4} color="secondary">
-                      <Avatar
-                        alt="Brandon Casamichana"
-                        src="/static/images/avatar/1.jpg"
-                      />
-                    </Badge>
-                  </ListItemIcon>
-                  <ListItemText primary={"Brandon C."} />
-                </ListItem>
-              </List>
-            </Paper>
-          </Grid>
-        </Grid>
+        <Paper className="ChatWindow">
+          <List
+            subheader={
+              <ListSubheader component="div">Selected Message</ListSubheader>
+            }
+          >
+            <Divider component="li" />
+            <ListItem button>
+              <ListItemIcon>
+                <Avatar>P</Avatar>
+              </ListItemIcon>
+              <ListItemText
+                primary={
+                  <React.Fragment>
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      color="textPrimary"
+                    >
+                      Phantompigz
+                    </Typography>
+                  </React.Fragment>
+                }
+                secondary={
+                  <div>
+                    <React.Fragment>
+                      {
+                        " — Yeah I'll be on tomorrow as you saw from my inbox message."
+                      }
+                    </React.Fragment>
+                    <br />
+                    <React.Fragment>
+                      {" — Oh by the way, when does the new patch come out?"}
+                    </React.Fragment>
+                  </div>
+                }
+              />
+            </ListItem>
+            <Divider variant="inset" component="li" />
+            <ListItem button>
+              <ListItemIcon>
+                <Avatar>K</Avatar>
+              </ListItemIcon>
+              <ListItemText
+                primary={
+                  <React.Fragment>
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      color="textPrimary"
+                    >
+                      Kanna
+                    </Typography>
+                  </React.Fragment>
+                }
+                secondary={
+                  <div>
+                    <React.Fragment>
+                      {
+                        " — Great, I'm available most of tomorrow too. I'm not sure when the new patch comes out though."
+                      }
+                    </React.Fragment>
+                    <br />
+                    <React.Fragment>
+                      {
+                        " — Hopefully they fixed Doomfist, been waiting on bug fixes for some time now..."
+                      }
+                    </React.Fragment>
+                    <br />
+                    <React.Fragment>
+                      {
+                        " — The experimental card is looking promising. What do you think about it?"
+                      }
+                    </React.Fragment>
+                  </div>
+                }
+              />
+            </ListItem>
+            <Divider variant="inset" component="li" />
+            <ListItem button>
+              <ListItemIcon>
+                <Avatar>P</Avatar>
+              </ListItemIcon>
+              <ListItemText
+                primary={
+                  <React.Fragment>
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      color="textPrimary"
+                    >
+                      Phantompigz
+                    </Typography>
+                  </React.Fragment>
+                }
+                secondary={
+                  <div>
+                    <React.Fragment>
+                      {
+                        " — Honestly I'm hoping they push it to live with the patch, it has some nice balance adjustments in it."
+                      }
+                    </React.Fragment>
+                  </div>
+                }
+              />
+            </ListItem>
+          </List>
+        </Paper>
+        <Paper className="FriendsWindow">
+          <List
+            subheader={
+              <ListSubheader component="div">Inbox Messages</ListSubheader>
+            }
+          >
+            <Divider component="li" />
+            <ListItem button>
+              <ListItemIcon>
+                <Badge badgeContent={1} color="secondary">
+                  <Avatar>P</Avatar>
+                </Badge>
+              </ListItemIcon>
+              <ListItemText
+                primary="I'll be off work."
+                secondary={
+                  <React.Fragment>
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      color="textPrimary"
+                    >
+                      Phantompigz
+                    </Typography>
+                    {" — Some things cleared up and I'll be on tomorrow…"}
+                  </React.Fragment>
+                }
+              />
+            </ListItem>
+            <Divider variant="inset" component="li" />
+            <ListItem button>
+              <ListItemIcon>
+                <Badge color="secondary">
+                  <Avatar>K</Avatar>
+                </Badge>
+              </ListItemIcon>
+              <ListItemText
+                primary="I made it to diamond!"
+                secondary={
+                  <React.Fragment>
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      color="textPrimary"
+                    >
+                      Kanna
+                    </Typography>
+                    {
+                      " — I made it to diamond yesterday, if you want to duo later…"
+                    }
+                  </React.Fragment>
+                }
+              />
+            </ListItem>
+          </List>
+        </Paper>
       </div>
     </div>
   );
