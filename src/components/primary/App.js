@@ -244,10 +244,52 @@ function ProfMenu(props) {
 }
 
 function App(props) {
-  const [loggedIn, setLoggedIn] = React.useState(false);
+  const [loggedIn, setLoggedIn] = React.useState(!!firebase.auth().currentUser);
+  let user = firebase.auth().currentUser;
+  let db = firebase.firestore();
+  let defaultUser = {
+    username: "",
+    friends: ["XQ3d6lp5nPbEP8Lg4wTK2dACjhr1", "Z7meyP7NPhRAKMTUOZqSuvdlo902"], //brandoncasa8, ultimategamer
+  };
 
-  firebase.auth().onAuthStateChanged((user) => {
-    setLoggedIn(!!user);
+  // Functions
+  const checkUserExists = (callback) => {
+    if (user !== undefined) {
+      db.collection("users")
+        .doc(user.uid)
+        .get()
+        .then((docSnapshot) => {
+          if (!docSnapshot.exists) createUser(callback);
+        });
+    }
+  };
+  const createUser = (callback) => {
+    if (user !== undefined) {
+      defaultUser.username = user.uid.toString();
+      console.log("Attempting to create user...");
+      db.collection("users")
+        .doc(user.uid)
+        .set(defaultUser)
+        .then(() => {
+          console.log("User created with ID: " + user.uid);
+          if (callback !== undefined) callback(true);
+        })
+        .catch((error) => {
+          console.error("Error creating user: ", error);
+          if (callback !== undefined) callback(false);
+        });
+    }
+  };
+
+  firebase.auth().onAuthStateChanged((tempUser) => {
+    setLoggedIn(!!tempUser);
+
+    if (tempUser) {
+      user = tempUser;
+      checkUserExists();
+    } else {
+      user = undefined;
+    }
   });
 
   return (
@@ -304,7 +346,10 @@ function App(props) {
           </AppBar>
           <Switch>
             <Route path="/messaging">
-              <MessagingContainer />
+              <MessagingContainer
+                checkUserExists={checkUserExists}
+                user={user}
+              />
             </Route>
             <Route path="/account/profile">
               <ProfileContainer />

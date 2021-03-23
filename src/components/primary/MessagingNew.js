@@ -48,142 +48,7 @@ function Username(props) {
   return name;
 }
 
-function MessagesSent(props) {
-  let items;
-
-  const [messageItemsReceived, setMessageItemsReceived] = React.useState("");
-  const [messageItemsSent, setMessageItemsSent] = React.useState("");
-
-  const [totalMessages, setTotalMessages] = React.useState("");
-
-  if (
-    props.currentChannel !== "" &&
-    messageItemsSent === "" &&
-    messageItemsReceived === ""
-  ) {
-    props.database
-      .collection("users")
-      .doc(props.currentChannel)
-      .get()
-      .then((docSnapshotReceived) => {
-        props.database
-          .collection("users")
-          .doc(props.selfid)
-          .get()
-          .then((docSnapshotSent) => {
-            let received = [];
-            let sent = [];
-
-            if (docSnapshotSent.exists) {
-              let messageChannelsSent = docSnapshotSent.data().messageChannels;
-              if (messageChannelsSent.hasOwnProperty(props.currentChannel)) {
-                sent = messageChannelsSent[props.currentChannel].messages;
-              }
-            }
-            if (docSnapshotReceived.exists) {
-              let messageChannelsReceived = docSnapshotReceived.data()
-                .messageChannels;
-              if (messageChannelsReceived.hasOwnProperty(props.selfid)) {
-                received = messageChannelsReceived[props.selfid].messages;
-              }
-            }
-
-            setMessageItemsReceived(received);
-            setMessageItemsSent(sent);
-
-            let total = [];
-
-            received.forEach((receivedElement) => {
-              let element = receivedElement;
-              element.action = "received";
-              total.push(element);
-            });
-
-            sent.forEach((sentElement) => {
-              let element = sentElement;
-              element.action = "sent";
-              total.push(element);
-            });
-
-            total.sort((a, b) => {
-              var keyA = new Date(a.timeSent),
-                keyB = new Date(b.timeSent);
-              // Compare the 2 dates
-              if (keyA < keyB) return -1;
-              if (keyA > keyB) return 1;
-              return 0;
-            });
-
-            setTotalMessages(total);
-          });
-      });
-  }
-
-  return (
-    <>
-      {totalMessages !== ""
-        ? totalMessages.map((value) => {
-            const action = value.action;
-            const message = value.message;
-
-            if (action === "sent") {
-              return (
-                <ListItem button>
-                  <ListItemIcon>
-                    <Avatar>A</Avatar>
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={
-                      <React.Fragment>
-                        <Typography
-                          component="span"
-                          variant="body2"
-                          color="textPrimary"
-                        >
-                          <Username
-                            database={props.database}
-                            userid={props.selfid}
-                          />
-                        </Typography>
-                      </React.Fragment>
-                    }
-                    secondary={<React.Fragment>— {message}</React.Fragment>}
-                  />
-                </ListItem>
-              );
-            } else {
-              return (
-                <ListItem button>
-                  <ListItemIcon>
-                    <Avatar>A</Avatar>
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={
-                      <React.Fragment>
-                        <Typography
-                          component="span"
-                          variant="body2"
-                          color="textPrimary"
-                        >
-                          <Username
-                            database={props.database}
-                            userid={props.currentChannel}
-                          />
-                        </Typography>
-                      </React.Fragment>
-                    }
-                    secondary={<React.Fragment>— {message}</React.Fragment>}
-                  />
-                </ListItem>
-              );
-            }
-          })
-        : "hello"}
-    </>
-  );
-}
-
-function Messaging(props) {
+function MessagingNew(props) {
   const [loggedIn, setLoggedIn] = React.useState(!!firebase.auth().currentUser);
 
   firebase.auth().onAuthStateChanged((user) => {
@@ -263,139 +128,22 @@ function Messaging(props) {
 }
 
 function MessagingLoggedin(props) {
+  // Props
+  let passedProps = {
+    checkUserExists: props.checkUserExists,
+    user: props.user,
+  };
+
+  // Custom variables
+  let db = firebase.firestore();
+
+  // State
   const [currentMessage, setCurrentMessage] = React.useState("");
   const [currentChannel, setCurrentChannel] = React.useState("");
 
-  var db = firebase.firestore();
-
-  let defaultUser = {
-    username: "",
-    messageChannels: {},
-    friends: ["XQ3d6lp5nPbEP8Lg4wTK2dACjhr1", "Z7meyP7NPhRAKMTUOZqSuvdlo902"], //brandoncasa8, ultimategamer
-  };
-
-  let user = firebase.auth().currentUser;
-
-  firebase.auth().onAuthStateChanged((tempUser) => {
-    if (tempUser) {
-      user = tempUser;
-    } else {
-      user = undefined;
-    }
-  });
-  let usersRef = undefined;
-
-  if (user !== undefined) {
-    let defaultUserTemp = defaultUser;
-    defaultUserTemp.username = user.uid.toString();
-
-    db.collection("users")
-      .doc(user.uid)
-      .get()
-      .then((docSnapshot) => {
-        if (docSnapshot.exists) {
-          usersRef = db.collection("users").doc(user.uid);
-
-          usersRef.onSnapshot((doc) => {
-            // console.log("Messages Updated", doc.data().messageChannels);
-          });
-        } else {
-          db.collection("users")
-            .doc(user.uid)
-            .set(defaultUserTemp)
-            .then(() => {
-              console.log("Document written with ID: ", user.uid);
-
-              usersRef = db.collection("users").doc(user.uid);
-              usersRef.onSnapshot((doc) => {
-                // console.log("Messages Updated", doc.data().messageChannels);
-              });
-            })
-            .catch((error) => {
-              console.error("Error adding document: ", error);
-            });
-        }
-      });
-  }
-
+  // Functions
   const onMessageInput = (event) => {
     setCurrentMessage(event.target.value);
-  };
-
-  const onMessageSend = (event) => {
-    if (user !== undefined) {
-      let defaultUserTemp = defaultUser;
-      defaultUserTemp.username = user.uid.toString();
-
-      db.collection("users")
-        .doc(user.uid)
-        .get()
-        .then((docSnapshot) => {
-          if (docSnapshot.exists) {
-            if (currentChannel !== "") {
-              addMessage(currentMessage, user.uid, currentChannel);
-            }
-          } else {
-            db.collection("users")
-              .doc(user.uid)
-              .set(defaultUserTemp)
-              .then(() => {
-                console.log("Document written with ID: ", user.uid);
-
-                if (currentChannel !== "") {
-                  addMessage(currentMessage, user.uid, currentChannel);
-                }
-              })
-              .catch((error) => {
-                console.error("Error adding document: ", error);
-              });
-          }
-        });
-    }
-  };
-
-  const addMessage = (message, uid, otherUserUID) => {
-    let defaultUserTemp = defaultUser;
-    defaultUserTemp.username = user.uid.toString();
-
-    let d = new Date();
-
-    let channels = {};
-
-    db.collection("users")
-      .doc(uid)
-      .get()
-      .then((docSnapshot) => {
-        if (docSnapshot.exists) {
-          const snapshotChannels = docSnapshot.data().messageChannels;
-          channels = snapshotChannels;
-
-          if (!channels.hasOwnProperty(otherUserUID)) {
-            channels[otherUserUID] = { messages: [] };
-          }
-
-          let messageToSend = { timeSent: d.getTime(), message: message };
-
-          channels[otherUserUID].messages.push(messageToSend);
-
-          let tempUser = docSnapshot.data();
-          tempUser.messageChannels = channels;
-
-          db.collection("users").doc(user.uid).set(tempUser);
-        } else {
-          db.collection("users")
-            .doc(user.uid)
-            .set(defaultUserTemp)
-            .then(() => {
-              console.log("Document written with ID: ", user.uid);
-
-              addMessage(currentMessage, user.uid, currentChannel);
-            })
-            .catch((error) => {
-              console.error("Error adding document: ", error);
-            });
-        }
-      });
   };
 
   return (
@@ -471,15 +219,7 @@ function MessagingLoggedin(props) {
               }
             >
               <Divider component="li" />
-              {currentChannel !== "" ? (
-                <MessagesSent
-                  database={db}
-                  currentChannel={currentChannel}
-                  selfid={user.uid}
-                />
-              ) : (
-                <div />
-              )}
+              {currentChannel !== "" ? "sent messages" : <div />}
             </List>
           </Paper>
           <Paper className="ChatInput">
@@ -494,7 +234,7 @@ function MessagingLoggedin(props) {
               onInput={onMessageInput}
             />
             <Divider orientation="vertical" />
-            <IconButton className="IconButtonRight" onClick={onMessageSend}>
+            <IconButton className="IconButtonRight">
               <SendIcon color="secondary" />
             </IconButton>
           </Paper>
@@ -566,4 +306,4 @@ function MessagingLoggedin(props) {
   );
 }
 
-export default Messaging;
+export default MessagingNew;

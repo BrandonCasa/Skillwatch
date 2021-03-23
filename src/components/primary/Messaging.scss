@@ -32,11 +32,53 @@
     flex-direction: row;
     display: flex;
 
-    .ChatWindow {
-      padding: 16px;
+    .Chat {
       flex-grow: 1;
-      margin-right: 8px;
-      margin-bottom: 16px;
+      flex-direction: column;
+      display: flex;
+
+      .ChatWindow {
+        padding: 16px;
+        flex-grow: 1;
+        margin-right: 8px;
+        margin-bottom: 8px;
+      }
+
+      .ChatInput {
+        padding: 8px;
+        margin-right: 8px;
+        margin-top: 8px;
+        margin-bottom: 16px;
+        flex-direction: row;
+        display: flex;
+
+        .IconButtonLeft {
+          padding: 4px;
+          width: 42px;
+          height: 42px;
+          margin-right: 8px;
+        }
+
+        .InputBox {
+          background: transparent;
+          border: none;
+          outline: none;
+          color: white;
+          padding: 4px;
+          margin-left: 16px;
+          margin-right: 16px;
+          height: 42px;
+          flex-grow: 1;
+          font-size: 16px;
+        }
+
+        .IconButtonRight {
+          padding: 4px;
+          width: 42px;
+          height: 42px;
+          margin-left: 8px;
+        }
+      }
     }
 
     .FriendsWindow {
