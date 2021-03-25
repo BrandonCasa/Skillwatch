@@ -211,14 +211,23 @@ function MessagingLoggedin(props) {
     if (currentChannel !== "") {
       db.collection("chatChannels")
         .doc(currentChannel)
-        .update({
-          messages: firebase.firestore.FieldValue.arrayUnion(newMessage),
-        })
-        .then(() => {
-          console.log(`Successfully sent message."`);
-        })
-        .catch((error) => {
-          console.error("Error sending message", error);
+        .get()
+        .then((docSnapshot) => {
+          if (docSnapshot.exists) {
+            let oldMessages = docSnapshot.data().messages;
+            oldMessages.push(newMessage);
+            db.collection("chatChannels")
+              .doc(currentChannel)
+              .update({
+                messages: oldMessages,
+              })
+              .then(() => {
+                console.log(`Successfully sent message."`);
+              })
+              .catch((error) => {
+                console.error("Error sending message", error);
+              });
+          }
         });
     }
   };
