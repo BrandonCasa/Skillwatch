@@ -249,7 +249,8 @@ function App(props) {
   let db = firebase.firestore();
   let defaultUser = {
     username: "",
-    friends: ["XQ3d6lp5nPbEP8Lg4wTK2dACjhr1", "Z7meyP7NPhRAKMTUOZqSuvdlo902"], //brandoncasa8, ultimategamer
+    friends: [],
+    channels: [],
   };
 
   // Functions
@@ -259,10 +260,38 @@ function App(props) {
         .doc(user.uid)
         .get()
         .then((docSnapshot) => {
-          if (!docSnapshot.exists) createUser(callback);
+          if (docSnapshot.exists) {
+            let keys = Object.keys(defaultUser);
+            keys.forEach((key) => {
+              if (!docSnapshot.data().hasOwnProperty(key)) {
+                updateFieldToUser(key, defaultUser[key]);
+              }
+            });
+          } else {
+            createUser(callback);
+          }
         });
     }
   };
+
+  const updateFieldToUser = (fieldName, fieldValue, callback) => {
+    db.collection("users")
+      .doc(user.uid)
+      .update({
+        [fieldName]: fieldValue,
+      })
+      .then(function () {
+        console.log(
+          `Successfully updated the user's field called "${fieldName}" to be "${fieldValue}"`
+        );
+        if (callback !== undefined) callback(true);
+      })
+      .catch(function (error) {
+        console.error("Error updating a user's field: ", error);
+        if (callback !== undefined) callback(false);
+      });
+  };
+
   const createUser = (callback) => {
     if (user !== undefined) {
       defaultUser.username = user.uid.toString();

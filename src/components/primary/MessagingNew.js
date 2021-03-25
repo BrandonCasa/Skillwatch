@@ -19,8 +19,9 @@ import Avatar from "@material-ui/core/Avatar";
 import Badge from "@material-ui/core/Badge";
 import ListSubheader from "@material-ui/core/ListSubheader";
 import AddIcon from "@material-ui/icons/Add";
-import TextField from "@material-ui/core/TextField";
 import SendIcon from "@material-ui/icons/Send";
+import ChatIcon from "@material-ui/icons/Chat";
+import PersonIcon from "@material-ui/icons/Person";
 
 import firebase from "firebase/app";
 import "firebase/auth";
@@ -41,11 +42,45 @@ function Username(props) {
       .then((docSnapshot) => {
         if (docSnapshot.exists) {
           setName(docSnapshot.data().username);
+        } else {
+          setName(props.userid);
         }
       });
   }
 
   return name;
+}
+
+function MessagesGenerator(props) {
+  if (props.messageData !== "") {
+    return (
+      <React.Fragment>
+        {props.messageData.messages.map((message, id) => (
+          <ListItem button key={id}>
+            <ListItemIcon>
+              <Badge color="secondary">
+                <Avatar>
+                  <PersonIcon />
+                </Avatar>
+              </Badge>
+            </ListItemIcon>
+            <ListItemText
+              primary={
+                <Username
+                  database={props.database}
+                  userid={message.sender}
+                  {...props}
+                />
+              }
+              secondary={message.content}
+            />
+          </ListItem>
+        ))}
+      </React.Fragment>
+    );
+  } else {
+    return "";
+  }
 }
 
 function MessagingNew(props) {
@@ -138,12 +173,54 @@ function MessagingLoggedin(props) {
   let db = firebase.firestore();
 
   // State
-  const [currentMessage, setCurrentMessage] = React.useState("");
+  const [currentMessage, setCurrentMessage] = React.useState("Message: ");
   const [currentChannel, setCurrentChannel] = React.useState("");
+  const [inputPlaceholder, setInputPlaceholder] = React.useState("");
+  const [messageData, setMessageData] = React.useState("");
 
   // Functions
   const onMessageInput = (event) => {
     setCurrentMessage(event.target.value);
+  };
+
+  const changeCurrentChannel = (newChannel) => {
+    db.collection("chatChannels")
+      .doc(newChannel)
+      .get()
+      .then((docSnapshot) => {
+        if (docSnapshot.exists) {
+          setInputPlaceholder(`Message: (${newChannel})`);
+          setCurrentChannel(newChannel);
+        } else {
+          setInputPlaceholder(`Message: (Unknown Channel)`);
+          setCurrentChannel(newChannel);
+        }
+      });
+    db.collection("chatChannels")
+      .doc(newChannel)
+      .onSnapshot((snapshot) => {
+        setMessageData(snapshot.data());
+      });
+  };
+
+  const sendMessage = () => {
+    const newMessage = {
+      sender: passedProps.user.uid,
+      content: currentMessage,
+    };
+    if (currentChannel !== "") {
+      db.collection("chatChannels")
+        .doc(currentChannel)
+        .update({
+          messages: firebase.firestore.FieldValue.arrayUnion(newMessage),
+        })
+        .then(() => {
+          console.log(`Successfully sent message."`);
+        })
+        .catch((error) => {
+          console.error("Error sending message", error);
+        });
+    }
   };
 
   return (
@@ -214,12 +291,20 @@ function MessagingLoggedin(props) {
               subheader={
                 <ListSubheader component="div">
                   Channel History: (
-                  <Username database={db} userid={currentChannel} />)
+                  <Username database={db} userid={currentChannel} {...props} />)
                 </ListSubheader>
               }
             >
               <Divider component="li" />
-              {currentChannel !== "" ? "sent messages" : <div />}
+              {currentChannel !== "" ? (
+                <MessagesGenerator
+                  messageData={messageData}
+                  database={db}
+                  {...props}
+                />
+              ) : (
+                <div />
+              )}
             </List>
           </Paper>
           <Paper className="ChatInput">
@@ -229,12 +314,12 @@ function MessagingLoggedin(props) {
             <Divider orientation="vertical" />
             <input
               type="text"
-              placeholder="Message (Phantompigz)"
               className="InputBox"
               onInput={onMessageInput}
+              placeholder={inputPlaceholder}
             />
             <Divider orientation="vertical" />
-            <IconButton className="IconButtonRight">
+            <IconButton className="IconButtonRight" onClick={sendMessage}>
               <SendIcon color="secondary" />
             </IconButton>
           </Paper>
@@ -243,61 +328,20 @@ function MessagingLoggedin(props) {
           <List
             subheader={<ListSubheader component="div">Channels</ListSubheader>}
           >
-            <Divider component="li" />
-            <ListItem button>
-              <ListItemIcon>
-                <Badge badgeContent={1} color="secondary">
-                  <Avatar>P</Avatar>
-                </Badge>
-              </ListItemIcon>
-              <ListItemText
-                primary="Phantompigz"
-                secondary={
-                  <React.Fragment>
-                    {" — Last Message bla bla..."}
-                  </React.Fragment>
-                }
-              />
-            </ListItem>
-            <Divider variant="inset" component="li" />
+            <Divider component="li" key={0} />
             <ListItem
               button
-              onClick={() => setCurrentChannel("Z7meyP7NPhRAKMTUOZqSuvdlo902")}
+              onClick={() => changeCurrentChannel("General")}
+              key={1}
             >
               <ListItemIcon>
                 <Badge color="secondary">
-                  <Avatar>A</Avatar>
+                  <Avatar>
+                    <ChatIcon />
+                  </Avatar>
                 </Badge>
               </ListItemIcon>
-              <ListItemText
-                primary={
-                  <Username
-                    database={db}
-                    userid={"Z7meyP7NPhRAKMTUOZqSuvdlo902"}
-                  />
-                }
-                secondary={<React.Fragment>{" — e"}</React.Fragment>}
-              />
-            </ListItem>
-            <Divider variant="inset" component="li" />
-            <ListItem
-              button
-              onClick={() => setCurrentChannel("XQ3d6lp5nPbEP8Lg4wTK2dACjhr1")}
-            >
-              <ListItemIcon>
-                <Badge color="secondary">
-                  <Avatar>A</Avatar>
-                </Badge>
-              </ListItemIcon>
-              <ListItemText
-                primary={
-                  <Username
-                    database={db}
-                    userid={"XQ3d6lp5nPbEP8Lg4wTK2dACjhr1"}
-                  />
-                }
-                secondary={<React.Fragment>{" — e"}</React.Fragment>}
-              />
+              <ListItemText primary="General Chat" />
             </ListItem>
           </List>
         </Paper>
