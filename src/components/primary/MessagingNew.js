@@ -173,17 +173,15 @@ function MessagingLoggedin(props) {
   let db = firebase.firestore();
 
   // State
-  const [currentMessage, setCurrentMessage] = React.useState("Message: ");
   const [currentChannel, setCurrentChannel] = React.useState("");
   const [inputPlaceholder, setInputPlaceholder] = React.useState("");
   const [messageData, setMessageData] = React.useState("");
 
   // Functions
-  const onMessageInput = (event) => {
-    setCurrentMessage(event.target.value);
-  };
-
   const changeCurrentChannel = (newChannel) => {
+    let scrollChannel = currentChannel;
+    let topOld = 0;
+
     db.collection("chatChannels")
       .doc(newChannel)
       .get()
@@ -199,36 +197,63 @@ function MessagingLoggedin(props) {
     db.collection("chatChannels")
       .doc(newChannel)
       .onSnapshot((snapshot) => {
+        let scrollMessages = document.getElementsByClassName("Messages");
+
         setMessageData(snapshot.data());
+
+        if (scrollMessages !== undefined && scrollChannel !== newChannel) {
+          scrollMessages[0].scrollTop = scrollMessages[0].scrollHeight;
+          topOld = scrollMessages[0].scrollTop;
+          scrollChannel = newChannel;
+        }
+        if (
+          scrollMessages !== undefined &&
+          scrollChannel === newChannel &&
+          topOld === scrollMessages[0].scrollTop
+        ) {
+          scrollMessages[0].scrollTop = scrollMessages[0].scrollHeight;
+          topOld = scrollMessages[0].scrollTop;
+        }
+        if (
+          scrollMessages !== undefined &&
+          scrollMessages[0].scrollHeight - scrollMessages[0].scrollTop < 850
+        ) {
+          scrollMessages[0].scrollTop = scrollMessages[0].scrollHeight;
+          topOld = scrollMessages[0].scrollTop;
+        }
       });
   };
 
   const sendMessage = () => {
-    const newMessage = {
-      sender: passedProps.user.uid,
-      content: currentMessage,
-    };
-    if (currentChannel !== "") {
-      db.collection("chatChannels")
-        .doc(currentChannel)
-        .get()
-        .then((docSnapshot) => {
-          if (docSnapshot.exists) {
-            let oldMessages = docSnapshot.data().messages;
-            oldMessages.push(newMessage);
-            db.collection("chatChannels")
-              .doc(currentChannel)
-              .update({
-                messages: oldMessages,
-              })
-              .then(() => {
-                console.log(`Successfully sent message."`);
-              })
-              .catch((error) => {
-                console.error("Error sending message", error);
-              });
-          }
-        });
+    let inputBox = document.getElementsByClassName("InputBox");
+    if (inputBox[0] !== undefined) {
+      const newMessage = {
+        sender: passedProps.user.uid,
+        content: inputBox[0].value,
+      };
+      if (currentChannel !== "") {
+        db.collection("chatChannels")
+          .doc(currentChannel)
+          .get()
+          .then((docSnapshot) => {
+            if (docSnapshot.exists) {
+              let oldMessages = docSnapshot.data().messages;
+              oldMessages.push(newMessage);
+              db.collection("chatChannels")
+                .doc(currentChannel)
+                .update({
+                  messages: oldMessages,
+                })
+                .then(() => {
+                  console.log(`Successfully sent message.`);
+                  inputBox[0].value = "";
+                })
+                .catch((error) => {
+                  console.error("Error sending message", error);
+                });
+            }
+          });
+      }
     }
   };
 
@@ -297,22 +322,25 @@ function MessagingLoggedin(props) {
         <div className="Chat">
           <Paper className="ChatWindow">
             <List
+              className="ChatList"
               subheader={
                 <ListSubheader component="div">
                   Channel History: (
                   <Username database={db} userid={currentChannel} {...props} />)
+                  <Divider component="li" />
                 </ListSubheader>
               }
             >
-              <Divider component="li" />
               {currentChannel !== "" ? (
-                <MessagesGenerator
-                  messageData={messageData}
-                  database={db}
-                  {...props}
-                />
+                <div className="Messages">
+                  <MessagesGenerator
+                    messageData={messageData}
+                    database={db}
+                    {...props}
+                  />
+                </div>
               ) : (
-                <div />
+                <div>Please select a channel.</div>
               )}
             </List>
           </Paper>
@@ -321,12 +349,19 @@ function MessagingLoggedin(props) {
               <AddIcon />
             </IconButton>
             <Divider orientation="vertical" />
-            <input
-              type="text"
-              className="InputBox"
-              onInput={onMessageInput}
-              placeholder={inputPlaceholder}
-            />
+            <form
+              className="InputBoxForm"
+              onSubmit={(event) => {
+                event.preventDefault();
+                sendMessage();
+              }}
+            >
+              <input
+                type="text"
+                className="InputBox"
+                placeholder={inputPlaceholder}
+              />
+            </form>
             <Divider orientation="vertical" />
             <IconButton className="IconButtonRight" onClick={sendMessage}>
               <SendIcon color="secondary" />
