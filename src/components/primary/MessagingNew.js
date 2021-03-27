@@ -84,13 +84,7 @@ function MessagesGenerator(props) {
 }
 
 function MessagingNew(props) {
-  const [loggedIn, setLoggedIn] = React.useState(!!firebase.auth().currentUser);
-
-  firebase.auth().onAuthStateChanged((user) => {
-    setLoggedIn(!!user);
-  });
-
-  if (loggedIn) {
+  if (props.loggedIn) {
     return <MessagingLoggedin {...props} />;
   } else {
     return (
@@ -340,7 +334,7 @@ function MessagingLoggedin(props) {
                   />
                 </div>
               ) : (
-                <div>Please select a channel.</div>
+                <div>Please select a channel on the right.</div>
               )}
             </List>
           </Paper>
@@ -386,6 +380,21 @@ function MessagingLoggedin(props) {
                 </Badge>
               </ListItemIcon>
               <ListItemText primary="General Chat" />
+            </ListItem>
+            <Divider component="li" key={2} />
+            <ListItem
+              button
+              onClick={() => changeCurrentChannel("Feedback")}
+              key={3}
+            >
+              <ListItemIcon>
+                <Badge color="secondary">
+                  <Avatar>
+                    <ChatIcon />
+                  </Avatar>
+                </Badge>
+              </ListItemIcon>
+              <ListItemText primary="Development Feedback" />
             </ListItem>
           </List>
         </Paper>

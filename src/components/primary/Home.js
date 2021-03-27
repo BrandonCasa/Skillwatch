@@ -18,6 +18,21 @@ import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import { Link } from "react-router-dom";
 import "./Home.scss";
 
+function HomeLoggedIn(props) {
+  return (
+    <div>
+      You are logged in!
+      <br />
+      Please either go to Messaging or check out the in development Profile
+      page; accessable at the top right.
+    </div>
+  );
+}
+
+function HomeNotLoggedIn(props) {
+  return <div>You are NOT logged in!</div>;
+}
+
 function Home(props) {
   return (
     <div className="Home">
@@ -75,7 +90,11 @@ function Home(props) {
           ContentClosed: !props.primaryDrawerOpen,
         })}
       >
-        Home
+        {props.loggedIn ? (
+          <HomeLoggedIn {...props} />
+        ) : (
+          <HomeNotLoggedIn {...props} />
+        )}
       </div>
     </div>
   );

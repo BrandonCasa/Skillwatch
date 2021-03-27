@@ -377,14 +377,15 @@ function App(props) {
             <Route path="/messaging">
               <MessagingContainer
                 checkUserExists={checkUserExists}
+                loggedIn={loggedIn}
                 user={user}
               />
             </Route>
             <Route path="/account/profile">
-              <ProfileContainer />
+              <ProfileContainer loggedIn={loggedIn} user={user} />
             </Route>
             <Route path="/">
-              <HomeContainer />
+              <HomeContainer loggedIn={loggedIn} user={user} />
             </Route>
           </Switch>
         </ThemeProvider>
