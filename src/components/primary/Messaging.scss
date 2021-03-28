@@ -37,6 +37,7 @@
       flex-direction: column;
       display: flex;
       max-height: 100%;
+      max-width: calc(100% - 358px);
 
       .ChatWindow {
         padding: 16px;
@@ -44,20 +45,25 @@
         margin-right: 8px;
         margin-bottom: 8px;
         max-height: calc(100% - 90px);
+        max-width: 100%;
 
         .ChatList {
           height: 100%;
+          max-width: 100%;
 
           .Messages {
             overflow-y: scroll;
             height: calc(100% - 41px);
+            max-width: 100%;
 
             .MessageText {
+              max-width: 100%;
               span {
-                max-width: 90%;
+                max-width: 100%;
               }
               p {
-                max-width: 90%;
+                max-width: 100%;
+                word-wrap: break-word;
               }
             }
           }
@@ -106,6 +112,18 @@
           margin-left: 8px;
         }
       }
+
+      transition: max-width 225ms cubic-bezier(0.4, 0, 0.6, 1) 0ms;
+    }
+
+    .ChatDrawerOpen {
+      flex-grow: 1;
+      flex-direction: column;
+      display: flex;
+      max-height: 100%;
+      max-width: calc(100% - 598px);
+
+      transition: max-width 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
     }
 
     .FriendsWindow {

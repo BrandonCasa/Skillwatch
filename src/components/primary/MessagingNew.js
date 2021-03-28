@@ -339,7 +339,11 @@ function MessagingLoggedin(props) {
           ContentClosed: !props.primaryDrawerOpen,
         })}
       >
-        <div className="Chat">
+        <div
+          className={clsx("Chat", {
+            ChatDrawerOpen: props.primaryDrawerOpen,
+          })}
+        >
           <Paper className="ChatWindow">
             <List
               className="ChatList"
