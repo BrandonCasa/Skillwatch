@@ -25,6 +25,7 @@ import EditIcon from "@material-ui/icons/Edit";
 import AddPhotoAlternateIcon from "@material-ui/icons/AddPhotoAlternate";
 import ListSubheader from "@material-ui/core/ListSubheader";
 import TextField from "@material-ui/core/TextField";
+import SaveIcon from "@material-ui/icons/Save";
 
 import { Link } from "react-router-dom";
 import "./Profile.scss";
@@ -186,6 +187,9 @@ function ProfileLoggedIn(props) {
                 }}
               />
             </form>
+            <IconButton className="SaveButton" onClick={submitNewName}>
+              <SaveIcon />
+            </IconButton>
           </div>
         </Paper>
         <Paper className="PaperTopRight">
