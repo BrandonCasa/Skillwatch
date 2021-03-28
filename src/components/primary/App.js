@@ -119,12 +119,8 @@ function LoginRegisterBtn(props) {
       <Button variant="contained" onClick={handleClickOpen}>
         Login/Register
       </Button>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="form-dialog-title"
-      >
-        <DialogTitle id="form-dialog-title">Login</DialogTitle>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Login</DialogTitle>
         <DialogContent>
           <DialogContentText>
             If you don't own an account, begin typing an email to create one.
@@ -251,6 +247,7 @@ function App(props) {
     username: "",
     friends: [],
     channels: [],
+    pfp: "",
   };
 
   // Functions
@@ -379,13 +376,14 @@ function App(props) {
                 checkUserExists={checkUserExists}
                 loggedIn={loggedIn}
                 user={user}
+                database={db}
               />
             </Route>
             <Route path="/account/profile">
-              <ProfileContainer loggedIn={loggedIn} user={user} />
+              <ProfileContainer loggedIn={loggedIn} user={user} database={db} />
             </Route>
             <Route path="/">
-              <HomeContainer loggedIn={loggedIn} user={user} />
+              <HomeContainer loggedIn={loggedIn} user={user} database={db} />
             </Route>
           </Switch>
         </ThemeProvider>

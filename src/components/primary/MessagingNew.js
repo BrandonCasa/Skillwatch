@@ -51,30 +51,49 @@ function Username(props) {
   return name;
 }
 
+function Message(props) {
+  let passedProps = {
+    user: props.user,
+    db: props.database,
+  };
+
+  const [pfpBlob, setPfpBlob] = React.useState("");
+  passedProps.db
+    .collection("users")
+    .doc(props.message.sender)
+    .onSnapshot((snapshot) => {
+      setPfpBlob(snapshot.data().pfp);
+    });
+
+  return (
+    <ListItem button key={props.id}>
+      <ListItemIcon>
+        <Badge color="secondary">
+          <Avatar src={pfpBlob}>
+            <PersonIcon />
+          </Avatar>
+        </Badge>
+      </ListItemIcon>
+      <ListItemText
+        primary={
+          <Username
+            database={props.database}
+            userid={props.message.sender}
+            {...props}
+          />
+        }
+        secondary={props.message.content}
+      />
+    </ListItem>
+  );
+}
+
 function MessagesGenerator(props) {
   if (props.messageData !== "") {
     return (
       <React.Fragment>
         {props.messageData.messages.map((message, id) => (
-          <ListItem button key={id}>
-            <ListItemIcon>
-              <Badge color="secondary">
-                <Avatar>
-                  <PersonIcon />
-                </Avatar>
-              </Badge>
-            </ListItemIcon>
-            <ListItemText
-              primary={
-                <Username
-                  database={props.database}
-                  userid={message.sender}
-                  {...props}
-                />
-              }
-              secondary={message.content}
-            />
-          </ListItem>
+          <Message id={id} message={message} {...props} />
         ))}
       </React.Fragment>
     );
@@ -161,10 +180,10 @@ function MessagingLoggedin(props) {
   let passedProps = {
     checkUserExists: props.checkUserExists,
     user: props.user,
+    db: props.database,
   };
 
   // Custom variables
-  let db = firebase.firestore();
 
   // State
   const [currentChannel, setCurrentChannel] = React.useState("");
@@ -176,7 +195,8 @@ function MessagingLoggedin(props) {
     let scrollChannel = currentChannel;
     let topOld = 0;
 
-    db.collection("chatChannels")
+    passedProps.db
+      .collection("chatChannels")
       .doc(newChannel)
       .get()
       .then((docSnapshot) => {
@@ -188,7 +208,8 @@ function MessagingLoggedin(props) {
           setCurrentChannel(newChannel);
         }
       });
-    db.collection("chatChannels")
+    passedProps.db
+      .collection("chatChannels")
       .doc(newChannel)
       .onSnapshot((snapshot) => {
         let scrollMessages = document.getElementsByClassName("Messages");
@@ -226,14 +247,16 @@ function MessagingLoggedin(props) {
         content: inputBox[0].value,
       };
       if (currentChannel !== "") {
-        db.collection("chatChannels")
+        passedProps.db
+          .collection("chatChannels")
           .doc(currentChannel)
           .get()
           .then((docSnapshot) => {
             if (docSnapshot.exists) {
               let oldMessages = docSnapshot.data().messages;
               oldMessages.push(newMessage);
-              db.collection("chatChannels")
+              passedProps.db
+                .collection("chatChannels")
                 .doc(currentChannel)
                 .update({
                   messages: oldMessages,
@@ -320,7 +343,12 @@ function MessagingLoggedin(props) {
               subheader={
                 <ListSubheader component="div">
                   Channel History: (
-                  <Username database={db} userid={currentChannel} {...props} />)
+                  <Username
+                    database={passedProps.db}
+                    userid={currentChannel}
+                    {...props}
+                  />
+                  )
                   <Divider component="li" />
                 </ListSubheader>
               }
@@ -329,7 +357,7 @@ function MessagingLoggedin(props) {
                 <div className="Messages">
                   <MessagesGenerator
                     messageData={messageData}
-                    database={db}
+                    database={passedProps.db}
                     {...props}
                   />
                 </div>
