@@ -83,6 +83,7 @@ function Message(props) {
           />
         }
         secondary={props.message.content}
+        className="MessageText"
       />
     </ListItem>
   );
@@ -241,7 +242,7 @@ function MessagingLoggedin(props) {
 
   const sendMessage = () => {
     let inputBox = document.getElementsByClassName("InputBox");
-    if (inputBox[0] !== undefined) {
+    if (inputBox[0] !== undefined && inputBox[0].value.length <= 2000) {
       const newMessage = {
         sender: passedProps.user.uid,
         content: inputBox[0].value,
@@ -271,6 +272,8 @@ function MessagingLoggedin(props) {
             }
           });
       }
+    } else if (inputBox[0] !== undefined && inputBox[0].value.length >= 2000) {
+      inputBox[0].value = "Character limit reached.";
     }
   };
 

@@ -47,9 +47,19 @@
 
         .ChatList {
           height: 100%;
+
           .Messages {
             overflow-y: scroll;
             height: calc(100% - 41px);
+
+            .MessageText {
+              span {
+                max-width: 90%;
+              }
+              p {
+                max-width: 90%;
+              }
+            }
           }
         }
       }
