@@ -37,7 +37,8 @@
       flex-direction: column;
       display: flex;
       max-height: 100%;
-      max-width: calc(100% - 358px);
+      width: calc(100% - 358px);
+      transition: width 225ms cubic-bezier(0.4, 0, 0.6, 1) 0ms;
 
       .ChatWindow {
         padding: 16px;
@@ -112,8 +113,6 @@
           margin-left: 8px;
         }
       }
-
-      transition: max-width 225ms cubic-bezier(0.4, 0, 0.6, 1) 0ms;
     }
 
     .ChatDrawerOpen {
@@ -121,9 +120,9 @@
       flex-direction: column;
       display: flex;
       max-height: 100%;
-      max-width: calc(100% - 598px);
+      width: calc(100% - 598px);
 
-      transition: max-width 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+      transition: width 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
     }
 
     .FriendsWindow {
