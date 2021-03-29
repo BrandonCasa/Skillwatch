@@ -26,6 +26,7 @@ import AddPhotoAlternateIcon from "@material-ui/icons/AddPhotoAlternate";
 import ListSubheader from "@material-ui/core/ListSubheader";
 import TextField from "@material-ui/core/TextField";
 import SaveIcon from "@material-ui/icons/Save";
+import InputAdornment from "@material-ui/core/InputAdornment";
 
 import { Link } from "react-router-dom";
 import "./Profile.scss";
@@ -75,19 +76,56 @@ function ProfileLoggedIn(props) {
       });
   };
 
-  const submitNewName = (event) => {
+  const submitNewInfo = (event) => {
     event.preventDefault();
-    passedProps.db
+    props.database
       .collection("users")
-      .doc(passedProps.user.uid)
+      .doc(props.user.uid)
+      .get()
+      .then((snapshot) => {
+        if (snapshot.exists) {
+          let oldUsername = snapshot.data().username;
+
+          props.database
+            .collection("users")
+            .doc(props.user.uid)
+            .update({
+              username: document.getElementById("usernameInput").value,
+            })
+            .then(() => {
+              props.database
+                .collection("users")
+                .doc("FriendStore")
+                .get()
+                .then((friendStoreSnap) => {
+                  if (friendStoreSnap.exists) {
+                    let usernames = friendStoreSnap.data().usernames;
+                    delete usernames[oldUsername];
+
+                    usernames[document.getElementById("usernameInput").value] =
+                      props.user.uid;
+
+                    props.database
+                      .collection("users")
+                      .doc("FriendStore")
+                      .update({
+                        usernames: usernames,
+                      });
+                  }
+                });
+              console.log(`Successfully updated username.`);
+            })
+            .catch((error) => {
+              console.error("Error updating username", error);
+            });
+        }
+      });
+
+    props.database
+      .collection("users")
+      .doc(props.user.uid)
       .update({
-        username: document.getElementById("usernameInput").value,
-      })
-      .then(() => {
-        console.log(`Successfully updated username.`);
-      })
-      .catch((error) => {
-        console.error("Error updating username", error);
+        bio: document.getElementById("bioInput").value,
       });
   };
 
@@ -107,14 +145,19 @@ function ProfileLoggedIn(props) {
           snapshot.exists &&
           snapshot.data().username === passedProps.user.uid
         ) {
-          setUsername("");
+          document.getElementById("usernameInput").value = "";
+          document.getElementById("bioInput").value = "";
         } else if (
           snapshot.exists &&
           snapshot.data().username !== passedProps.user.uid
         ) {
-          setUsername(snapshot.data().username);
+          document.getElementById(
+            "usernameInput"
+          ).value = snapshot.data().username;
+          document.getElementById("bioInput").value = snapshot.data().bio;
         } else {
-          setUsername();
+          document.getElementById("usernameInput").value = "";
+          document.getElementById("bioInput").value = "";
         }
       });
   }, []);
@@ -174,20 +217,31 @@ function ProfileLoggedIn(props) {
               noValidate
               autoComplete="off"
               className="UsernameInput"
-              onSubmit={submitNewName}
+              onSubmit={submitNewInfo}
             >
               <TextField
                 id="usernameInput"
                 label="Username"
                 className="Input"
                 color="secondary"
-                value={username}
-                onInput={(event) => {
-                  setUsername(event.target.value);
-                }}
+                defaultValue=" "
               />
             </form>
-            <IconButton className="SaveButton" onClick={submitNewName}>
+            <form
+              noValidate
+              autoComplete="off"
+              className="UsernameInput"
+              onSubmit={submitNewInfo}
+            >
+              <TextField
+                id="bioInput"
+                label="Bio"
+                className="Input"
+                color="secondary"
+                defaultValue=" "
+              />
+            </form>
+            <IconButton className="SaveButton" onClick={submitNewInfo}>
               <SaveIcon />
             </IconButton>
           </div>
