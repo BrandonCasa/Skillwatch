@@ -1,0 +1,58 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  height: 100vh;
+
+  .Accordion {
+    .Header {
+      margin-right: 8px;
+    }
+
+    .Header {
+      margin-right: 8px;
+    }
+  }
+
+  .AccordionOnline {
+    width: 100%;
+
+    background-color: rgb(67, 181, 129);
+  }
+
+  .AccordionOffline {
+    width: 100%;
+
+    background-color: rgb(150, 150, 150);
+  }
+
+  .AccordionAway {
+    width: 100%;
+
+    background-color: rgb(250, 166, 26);
+  }
+
+  .AccordionDnD {
+    width: 100%;
+
+    background-color: rgb(240, 71, 71);
+  }
+
+  .AccordionError {
+    width: 100%;
+
+    background-color: rgb(255, 0, 0);
+  }
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.root {
+  height: 100%;
+}

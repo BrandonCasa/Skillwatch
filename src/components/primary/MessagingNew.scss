@@ -1,0 +1,170 @@
+.Messaging {
+  display: flex;
+  height: calc(100% - 56px);
+
+  @media (min-width: 600px) {
+    height: calc(100% - 64px);
+  }
+
+  @media (min-width: 0px) and (orientation: landscape) {
+    height: calc(100% - 48px);
+  }
+
+  .Drawer {
+    width: 240px;
+    flex-shrink: 0;
+
+    .MenuButton {
+      margin-right: 16px;
+    }
+
+    .DrawerPaper {
+      width: 240px;
+    }
+  }
+
+  .Content {
+    padding: 16px;
+    width: 100%;
+    margin-left: 0px;
+    transition: margin-left 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+    flex-direction: column;
+    display: flex;
+
+    height: calc(100% - 16px);
+
+    .ContentAppBar {
+      flex-direction: row;
+      display: flex;
+
+      .Tabs {
+        flex-grow: 1;
+      }
+
+      .FilterButton {
+        align-self: flex-end;
+        margin-right: 12px;
+        height: 36px;
+        width: 36px;
+        margin-top: auto;
+        margin-bottom: auto;
+      }
+    }
+
+    .TabContent {
+      flex-grow: 1;
+      padding: 16px;
+
+      .Friends {
+        display: flex;
+        flex-direction: row;
+        height: 100%;
+
+        .FriendsList {
+          flex-grow: 1;
+          margin-right: 8px;
+
+          .Accordion {
+            .Header {
+              margin-right: 8px;
+            }
+
+            .Header {
+              margin-right: 8px;
+            }
+          }
+
+          .AccordionOnline {
+            width: 100%;
+
+            background-color: rgb(67, 181, 129);
+          }
+
+          .AccordionOffline {
+            width: 100%;
+
+            background-color: rgb(150, 150, 150);
+          }
+
+          .AccordionAway {
+            width: 100%;
+
+            background-color: rgb(250, 166, 26);
+          }
+
+          .AccordionDnD {
+            width: 100%;
+
+            background-color: rgb(240, 71, 71);
+          }
+
+          .AccordionError {
+            width: 100%;
+
+            background-color: rgb(255, 0, 0);
+          }
+        }
+
+        .FriendRightBar {
+          display: flex;
+          flex-direction: column;
+
+          .FriendSorting {
+            height: auto;
+            width: 250px;
+            margin-bottom: 8px;
+            margin-left: 8px;
+            padding: 8px;
+
+            .FriendsSortList {
+              padding-top: 0px;
+            }
+          }
+
+          .FriendActions {
+            height: auto;
+            width: 250px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+            margin-left: 8px;
+            padding: 8px;
+
+            .FriendsActionsList {
+              padding-top: 0px;
+            }
+          }
+
+          .FriendRequests {
+            flex-grow: 1;
+            width: 250px;
+            margin-top: 8px;
+            margin-left: 8px;
+            padding: 8px;
+
+            .FriendsRequestsList {
+              padding-top: 0px;
+
+              .IconButton {
+                padding: 4px;
+              }
+
+              .Username {
+                flex-grow: 1;
+              }
+
+              .DividerInsetMiddle {
+                margin-left: 54px;
+                margin-right: 54px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .ContentClosed {
+    margin-left: -240px;
+    transition: margin-left 225ms cubic-bezier(0.4, 0, 0.6, 1) 0ms;
+  }
+}

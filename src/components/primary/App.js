@@ -23,6 +23,7 @@ import Divider from "@material-ui/core/Divider";
 import firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/messaging";
+import "firebase/firestore";
 
 import {
   BrowserRouter as Router,
@@ -51,19 +52,15 @@ function LoginRegisterBtn(props) {
   const handleClickOpen = () => {
     setOpen(true);
   };
-
   const handleClose = () => {
     setOpen(false);
   };
-
   const onEmailInput = (event) => {
     setEmail(event.target.value);
   };
-
   const onPassInput = (event) => {
     setPass(event.target.value);
   };
-
   const signInWithGoogle = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     return firebase
@@ -77,7 +74,6 @@ function LoginRegisterBtn(props) {
         setErrorText(errorMessage);
       });
   };
-
   const loginemail = (event) => {
     firebase
       .auth()
@@ -184,31 +180,30 @@ function ProfMenu(props) {
   const handleMenu = (event) => {
     setProfBtnAnchorEl(event.currentTarget);
   };
-
   const handleClose = () => {
     setProfBtnAnchorEl(null);
   };
-
   const toProfile = () => {
     setProfBtnAnchorEl(null);
     history.push("/account/profile");
   };
-
   const logOut = () => {
     setProfBtnAnchorEl(null);
     firebase.auth().signOut();
   };
 
-  history.listen((location, action) => {
-    if (action === "PUSH" && location.pathname === "/account/profile") {
-      setToProfileAllowed(false);
-    } else if (
-      action === "PUSH" &&
-      !(location.pathname === "/account/profile")
-    ) {
-      setToProfileAllowed(true);
-    }
-  });
+  React.useEffect(() => {
+    history.listen((location, action) => {
+      if (action === "PUSH" && location.pathname === "/account/profile") {
+        setToProfileAllowed(false);
+      } else if (
+        action === "PUSH" &&
+        !(location.pathname === "/account/profile")
+      ) {
+        setToProfileAllowed(true);
+      }
+    });
+  }, []);
 
   return (
     <div>
@@ -241,6 +236,7 @@ function ProfMenu(props) {
 
 function App(props) {
   const [loggedIn, setLoggedIn] = React.useState(!!firebase.auth().currentUser);
+
   let user = firebase.auth().currentUser;
   let db = firebase.firestore();
   let defaultUser = {
@@ -248,6 +244,11 @@ function App(props) {
     friends: [],
     channels: [],
     pfp: "",
+    bio: "",
+    selfTags: [],
+    incomingFriendRequests: [],
+    outgoingFriendRequests: [],
+    status: "Error",
   };
 
   // Functions
@@ -264,13 +265,27 @@ function App(props) {
                 updateFieldToUser(key, defaultUser[key]);
               }
             });
+
+            db.collection("users")
+              .doc("FriendStore")
+              .get()
+              .then((friendStoreSnap) => {
+                if (friendStoreSnap.exists) {
+                  let myUsername = docSnapshot.data().username;
+                  let usernames = friendStoreSnap.data().usernames;
+
+                  if (!usernames.hasOwnProperty(myUsername)) {
+                    usernames[myUsername] = user.uid;
+                    updateUsernameJson(usernames);
+                  }
+                }
+              });
           } else {
             createUser(callback);
           }
         });
     }
   };
-
   const updateFieldToUser = (fieldName, fieldValue, callback) => {
     db.collection("users")
       .doc(user.uid)
@@ -288,7 +303,6 @@ function App(props) {
         if (callback !== undefined) callback(false);
       });
   };
-
   const createUser = (callback) => {
     if (user !== undefined) {
       defaultUser.username = user.uid.toString();
@@ -297,8 +311,27 @@ function App(props) {
         .doc(user.uid)
         .set(defaultUser)
         .then(() => {
-          console.log("User created with ID: " + user.uid);
-          if (callback !== undefined) callback(true);
+          db.collection("users")
+            .doc("FriendStore")
+            .get()
+            .then((friendStoreSnap) => {
+              if (friendStoreSnap.exists) {
+                let usernames = friendStoreSnap.data().usernames;
+
+                if (!usernames.hasOwnProperty(defaultUser.username)) {
+                  usernames[defaultUser.username] = user.uid;
+                  updateUsernameJson(usernames, (success) => {
+                    if (success) {
+                      console.log("User created with ID: " + user.uid);
+                      if (callback !== undefined) callback(true);
+                    } else {
+                      console.error("Error creating user.");
+                      if (callback !== undefined) callback(false);
+                    }
+                  });
+                }
+              }
+            });
         })
         .catch((error) => {
           console.error("Error creating user: ", error);
@@ -306,17 +339,34 @@ function App(props) {
         });
     }
   };
+  const updateUsernameJson = (newUsernamesJson, callback) => {
+    db.collection("users")
+      .doc("FriendStore")
+      .update({
+        usernames: newUsernamesJson,
+      })
+      .then(function () {
+        console.log(`Successfully updated the friend store.`);
+        if (callback !== undefined) callback(true);
+      })
+      .catch(function (error) {
+        console.error("Error updating a friend store: ", error);
+        if (callback !== undefined) callback(false);
+      });
+  };
 
-  firebase.auth().onAuthStateChanged((tempUser) => {
-    setLoggedIn(!!tempUser);
+  React.useEffect(() => {
+    firebase.auth().onAuthStateChanged((tempUser) => {
+      setLoggedIn(!!tempUser);
 
-    if (tempUser) {
-      user = tempUser;
-      checkUserExists();
-    } else {
-      user = undefined;
-    }
-  });
+      if (tempUser) {
+        user = tempUser;
+        checkUserExists();
+      } else {
+        user = undefined;
+      }
+    });
+  }, []);
 
   return (
     <Router>
