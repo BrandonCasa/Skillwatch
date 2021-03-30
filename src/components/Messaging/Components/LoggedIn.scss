@@ -1,0 +1,13 @@
+.LoggedIn-AppBar {
+  flex-direction: row;
+  display: flex;
+
+  .LoggedIn-Tabs {
+    flex-grow: 1;
+  }
+}
+
+.LoggedIn-Content {
+  flex-grow: 1;
+  padding: 16px;
+}

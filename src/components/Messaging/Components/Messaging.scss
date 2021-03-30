@@ -1,0 +1,41 @@
+.Messaging {
+  display: flex;
+  height: calc(100% - 56px);
+
+  @media (min-width: 600px) {
+    height: calc(100% - 64px);
+  }
+
+  @media (min-width: 0px) and (orientation: landscape) {
+    height: calc(100% - 48px);
+  }
+
+  .Messaging-Drawer {
+    width: 240px;
+    flex-shrink: 0;
+
+    .Messaging-MenuButton {
+      margin-right: 16px;
+    }
+
+    .Messaging-DrawerPaper {
+      width: 240px;
+    }
+  }
+
+  .Messaging-Content {
+    padding: 16px;
+    width: 100%;
+    margin-left: 0px;
+    transition: margin-left 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+    flex-direction: column;
+    display: flex;
+
+    height: calc(100% - 16px);
+  }
+
+  .Messaging-ContentClosed {
+    margin-left: -240px;
+    transition: margin-left 225ms cubic-bezier(0.4, 0, 0.6, 1) 0ms;
+  }
+}

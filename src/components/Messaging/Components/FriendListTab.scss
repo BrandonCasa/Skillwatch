@@ -1,0 +1,44 @@
+.FriendsListTab {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+
+  .FriendsListTab-ListPaper {
+    flex-grow: 1;
+    padding: 8px;
+
+    .FriendsListTab-List {
+      width: 100%;
+    }
+  }
+
+  .FriendsListTab-RightBar {
+    display: flex;
+    flex-direction: column;
+
+    .FriendsListTab-Sorting {
+      height: auto;
+      width: 250px;
+      margin-bottom: 8px;
+      margin-left: 16px;
+      padding: 8px;
+
+      .FriendsListTab-List {
+        padding-top: 0px;
+      }
+    }
+
+    .FriendsListTab-Actions {
+      height: auto;
+      width: 250px;
+      margin-top: 8px;
+      margin-bottom: 8px;
+      margin-left: 16px;
+      padding: 8px;
+
+      .FriendsListTab-List {
+        padding-top: 0px;
+      }
+    }
+  }
+}

@@ -1,0 +1,54 @@
+.CurrentChannel-Content {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+
+  .CurrentChannel-Chat {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    margin-right: 8px;
+
+    .CurrentChannel-ChatPaper {
+      height: auto;
+      width: 250px;
+      padding: 8px;
+      flex-grow: 1;
+
+      .CurrentChannel-ChatList {
+        flex-grow: 1;
+        padding: 8px;
+      }
+    }
+  }
+
+  .CurrentChannel-RightBar {
+    display: flex;
+    flex-direction: column;
+    margin-left: 8px;
+
+    .CurrentChannel-SearchPaper {
+      height: auto;
+      min-height: 200px;
+      width: 250px;
+      padding: 8px;
+      margin-bottom: 8px;
+
+      .CurrentChannel-SearchContent {
+        display: flex;
+        flex-direction: row;
+
+        .CurrentChannel-SearchButton {
+          padding: 4px;
+        }
+      }
+    }
+
+    .CurrentChannel-SelectPaper {
+      flex-grow: 1;
+      width: 250px;
+      padding: 8px;
+      margin-top: 8px;
+    }
+  }
+}

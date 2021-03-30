@@ -1,0 +1,36 @@
+.FriendInList-ListItem {
+  .FriendInList-Checkbox {
+    height: 24px;
+    width: 24px;
+  }
+
+  .FriendInList-AccordionOnline {
+    width: 100%;
+
+    background-color: rgb(67, 181, 129);
+  }
+
+  .FriendInList-AccordionOffline {
+    width: 100%;
+
+    background-color: rgb(150, 150, 150);
+  }
+
+  .FriendInList-AccordionAway {
+    width: 100%;
+
+    background-color: rgb(250, 166, 26);
+  }
+
+  .FriendInList-AccordionDnD {
+    width: 100%;
+
+    background-color: rgb(240, 71, 71);
+  }
+
+  .FriendInList-AccordionError {
+    width: 100%;
+
+    background-color: rgb(255, 0, 0);
+  }
+}
