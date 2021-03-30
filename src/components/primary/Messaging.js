@@ -3,8 +3,11 @@ import clsx from "clsx";
 import Drawer from "@material-ui/core/Drawer";
 import AdjustIcon from "@material-ui/icons/Adjust";
 import List from "@material-ui/core/List";
+import Snackbar from "@material-ui/core/Snackbar";
+import InputAdornment from "@material-ui/core/InputAdornment";
 import Divider from "@material-ui/core/Divider";
 import HomeIcon from "@material-ui/icons/Home";
+import SearchIcon from "@material-ui/icons/Search";
 import CheckIcon from "@material-ui/icons/Check";
 import TrendingUpIcon from "@material-ui/icons/TrendingUp";
 import ListItem from "@material-ui/core/ListItem";
@@ -19,6 +22,7 @@ import Paper from "@material-ui/core/Paper";
 import Avatar from "@material-ui/core/Avatar";
 import Badge from "@material-ui/core/Badge";
 import Button from "@material-ui/core/Button";
+import CloseIcon from "@material-ui/icons/Close";
 import TextField from "@material-ui/core/TextField";
 import ListSubheader from "@material-ui/core/ListSubheader";
 import AppBar from "@material-ui/core/AppBar";
@@ -118,7 +122,6 @@ function FriendInList(props) {
     return <React.Fragment />;
   }
 }
-
 function Username(props) {
   const [username, setUsername] = React.useState("Error");
 
@@ -135,7 +138,6 @@ function Username(props) {
 
   return username;
 }
-
 function FriendRequests(props) {
   const [friendRequests, setFriendRequests] = React.useState([]);
 
@@ -171,7 +173,6 @@ function FriendRequests(props) {
     </React.Fragment>
   ));
 }
-
 function FriendsListTab(props) {
   const [currentSorting, setCurrentSorting] = React.useState("OnlineFirst");
   const [friends, setFriends] = React.useState([]);
@@ -180,6 +181,16 @@ function FriendsListTab(props) {
   const [selectedFriendRequestId, setSelectedFriendRequestId] = React.useState(
     ""
   );
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackbarText, setSnackbarText] = React.useState("");
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setSnackbarOpen(false);
+  };
 
   const handleClickOpenAddFriend = () => {
     setAddFriendOpen(true);
@@ -264,11 +275,17 @@ function FriendsListTab(props) {
                                     "Sent friend request to user with id: " +
                                       usernames[inputEl.value]
                                   );
+                                  setSnackbarText(`Sent friend request.`);
+                                  setSnackbarOpen(true);
                                 } else {
                                   console.log(
                                     "Error sending friend request to user with id: " +
                                       usernames[inputEl.value]
                                   );
+                                  setSnackbarText(
+                                    `Error sending friend request.`
+                                  );
+                                  setSnackbarOpen(true);
                                 }
                               }
                             );
@@ -277,6 +294,8 @@ function FriendsListTab(props) {
                               "Error sending friend request to user with id: " +
                                 usernames[inputEl.value]
                             );
+                            setSnackbarText(`Error sending friend request.`);
+                            setSnackbarOpen(true);
                           }
                         }
                       );
@@ -285,10 +304,15 @@ function FriendsListTab(props) {
                         "Friend request already sent to user with id: " +
                           usernames[inputEl.value]
                       );
+                      setSnackbarText(`Already sent friend request.`);
+                      setSnackbarOpen(true);
                     }
                   }
                 }
               });
+          } else {
+            setSnackbarText(`No user with that name exists.`);
+            setSnackbarOpen(true);
           }
         }
       });
@@ -344,15 +368,21 @@ function FriendsListTab(props) {
                       })
                       .then(function () {
                         console.error("Successfully accepted friend request.");
+                        setSnackbarText("Accepted friend request.");
+                        setSnackbarOpen(true);
                       })
                       .catch(function (error) {
                         console.error("Error adding friend: ", error);
+                        setSnackbarText("Error accepting friend request.");
+                        setSnackbarOpen(true);
                       });
                   }
                 });
             })
             .catch(function (error) {
               console.error("Error adding friend: ", error);
+              setSnackbarText("Error adding friend.");
+              setSnackbarOpen(true);
             });
         }
         handleCloseAcceptFriend();
@@ -399,18 +429,24 @@ function FriendsListTab(props) {
                       })
                       .then(function () {
                         console.error("Successfully declined friend request.");
+                        setSnackbarText("Declined friend request.");
+                        setSnackbarOpen(true);
                       })
                       .catch(function (error) {
                         console.error(
                           "Error declining friend request: ",
                           error
                         );
+                        setSnackbarText("Error declining friend request.");
+                        setSnackbarOpen(true);
                       });
                   }
                 });
             })
             .catch(function (error) {
               console.error("Error declining friend request: ", error);
+              setSnackbarText("Error declining friend request.");
+              setSnackbarOpen(true);
             });
         }
         handleCloseAcceptFriend();
@@ -433,6 +469,28 @@ function FriendsListTab(props) {
 
   return (
     <div className="Friends">
+      <Snackbar
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        message={snackbarText}
+        action={
+          <React.Fragment>
+            <IconButton
+              size="small"
+              aria-label="close"
+              color="inherit"
+              onClick={handleCloseSnackbar}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </React.Fragment>
+        }
+      />
       <Dialog open={addFriendOpen} onClose={handleCloseAddFriend}>
         <DialogTitle>Add Friend</DialogTitle>
         <DialogContent>
@@ -601,9 +659,92 @@ function FriendsListTab(props) {
   );
 }
 
+function MessagesGenerator(props) {
+  return "xd";
+}
+
+function CurrentChannelTab(props) {
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackbarText, setSnackbarText] = React.useState("");
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setSnackbarOpen(false);
+  };
+
+  return (
+    <div className="CurrentChannel">
+      <Snackbar
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        message={snackbarText}
+        action={
+          <React.Fragment>
+            <IconButton
+              size="small"
+              aria-label="close"
+              color="inherit"
+              onClick={handleCloseSnackbar}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </React.Fragment>
+        }
+      />
+      <div className="ChatWindow">
+        <Paper className="ChatPaper" variant="outlined">
+          <ListSubheader component="div">
+            {`Channel History: (${props.currentChannel})`}
+          </ListSubheader>
+          <Divider />
+          <List className="ChatList">
+            <div className="Messages">
+              <MessagesGenerator {...props} />
+            </div>
+          </List>
+        </Paper>
+      </div>
+      <div className="ChatRightBar">
+        <Paper className="ChatSearch" variant="outlined">
+          <ListSubheader component="div">{`Channel Search`}</ListSubheader>
+          <Divider />
+          <div className="ChatSearchContents">
+            <TextField
+              label="Search"
+              color="secondary"
+              fullWidth
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton className="SearchButton">
+                      <SearchIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </div>
+        </Paper>
+        <Paper className="ChatChannelSelect" variant="outlined">
+          <ListSubheader component="div">{`Channel Select`}</ListSubheader>
+          <Divider />
+        </Paper>
+      </div>
+    </div>
+  );
+}
+
 function MessagingLoggedIn(props) {
   const [currentChannel, setCurrentChannel] = React.useState("Region");
-  const [currentTab, setCurrentTab] = React.useState(1);
+  const [currentTab, setCurrentTab] = React.useState(0);
 
   const handleChangeTab = (event, newValue) => {
     setCurrentTab(newValue);
@@ -612,9 +753,23 @@ function MessagingLoggedIn(props) {
   const currentTabContent = (props) => {
     switch (currentTab) {
       case 0:
-        return "Channels";
+        return (
+          <CurrentChannelTab
+            setCurrentChannel={setCurrentChannel}
+            setCurrentTab={setCurrentTab}
+            currentChannel={currentChannel}
+            {...props}
+          />
+        );
       case 1:
-        return <FriendsListTab {...props} />;
+        return (
+          <FriendsListTab
+            setCurrentChannel={setCurrentChannel}
+            setCurrentTab={setCurrentTab}
+            currentChannel={currentChannel}
+            {...props}
+          />
+        );
       case 2:
         return "Blocked List";
       default:
@@ -631,7 +786,7 @@ function MessagingLoggedIn(props) {
           onChange={handleChangeTab}
           className="Tabs"
         >
-          <Tab label="Channels" />
+          <Tab label="Channel" />
           <Tab label="Friends List" />
           <Tab label="Blocked List" />
         </Tabs>

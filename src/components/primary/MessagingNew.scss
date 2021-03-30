@@ -55,6 +55,63 @@
       flex-grow: 1;
       padding: 16px;
 
+      .CurrentChannel {
+        display: flex;
+        flex-direction: row;
+        height: 100%;
+
+        .ChatWindow {
+          display: flex;
+          flex-direction: row;
+          flex-grow: 1;
+
+          .ChatPaper {
+            height: auto;
+            width: 250px;
+            margin-right: 8px;
+            padding: 8px;
+            flex-grow: 1;
+
+            .ChatList {
+              flex-grow: 1;
+              margin-right: 8px;
+              padding: 8px;
+            }
+          }
+        }
+
+        .ChatRightBar {
+          display: flex;
+          flex-direction: column;
+
+          .ChatSearch {
+            height: auto;
+            min-height: 200px;
+            width: 250px;
+            margin-left: 8px;
+            padding: 8px;
+            margin-bottom: 8px;
+
+            .ChatSearchContents {
+              display: flex;
+              flex-direction: row;
+
+              .SearchButton {
+                padding: 4px;
+              }
+            }
+          }
+
+          .ChatChannelSelect {
+            flex-grow: 1;
+            width: 250px;
+            margin-left: 8px;
+            padding: 8px;
+            margin-top: 8px;
+          }
+        }
+      }
+
       .Friends {
         display: flex;
         flex-direction: row;
