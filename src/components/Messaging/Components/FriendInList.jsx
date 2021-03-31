@@ -28,7 +28,6 @@ function FriendInList(props) {
   const [selected, setSelected] = React.useState(false);
 
   React.useEffect(() => {
-    setSelected(props.selectedRequests.includes(props.friendId));
     props.database
       .collection("users")
       .doc(props.friendId)
@@ -82,26 +81,28 @@ function FriendInList(props) {
               </div>
               <Typography variant="h6">Select Request:</Typography>
               <Checkbox
-                checked={selected}
+                disabled={!props.checkbox}
+                checked={
+                  props.selectedRequests.includes(props.friendId) || selected
+                }
                 onChange={(event) => {
-                  let oldSelected = props.selectedRequests;
                   setSelected(event.target.checked);
 
-                  if (
-                    event.target.checked &&
-                    !oldSelected.includes(props.friendId)
-                  ) {
-                    oldSelected.push(props.friendId);
-                    props.setSelectedRequests(oldSelected);
-                  } else if (
-                    !event.target.checked &&
-                    oldSelected.includes(props.friendId)
-                  ) {
-                    const index = oldSelected.indexOf(props.friendId);
-                    if (index > -1) {
-                      oldSelected.splice(index, 1);
+                  if (!event.target.checked) {
+                    if (props.selectedRequests.includes(props.friendId)) {
+                      let newSelected = props.selectedRequests;
+                      const index = newSelected.indexOf(props.friendId);
+                      if (index > -1) {
+                        newSelected.splice(index, 1);
+                      }
+                      props.setSelectedRequests(newSelected);
                     }
-                    props.setSelectedRequests(oldSelected);
+                  } else {
+                    if (!props.selectedRequests.includes(props.friendId)) {
+                      let newSelected = props.selectedRequests;
+                      newSelected.push(props.friendId);
+                      props.setSelectedRequests(newSelected);
+                    }
                   }
                 }}
                 className="FriendInList-Checkbox"

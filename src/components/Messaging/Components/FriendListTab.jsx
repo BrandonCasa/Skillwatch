@@ -28,6 +28,7 @@ import FriendInList from "./FriendInList";
 function FriendListTab(props) {
   const [currentSorting, setCurrentSorting] = React.useState("OnlineFirst");
   const [addFriendOpen, setAddFriendOpen] = React.useState(false);
+  const [areYouSureOpen, setAreYouSureOpen] = React.useState(false);
   const [acceptFriendsOpen, setAcceptFriendsOpen] = React.useState(false);
   const [selectedRequests, setSelectedRequests] = React.useState([]);
   const [pendingRequests, setPendingRequests] = React.useState([]);
@@ -37,6 +38,17 @@ function FriendListTab(props) {
   };
   const openAddFriend = () => {
     setAddFriendOpen(true);
+  };
+  const closeAreYouSure = () => {
+    setAreYouSureOpen(false);
+  };
+  const openAreYouSure = () => {
+    if (selectedRequests.length > 0) {
+      setAreYouSureOpen(true);
+    } else {
+      props.setSnackbarText(`No friends are selected.`);
+      props.setSnackbarOpen(true);
+    }
   };
   const closeAcceptFriends = () => {
     setAcceptFriendsOpen(false);
@@ -73,6 +85,51 @@ function FriendListTab(props) {
       .then(() => {
         callback();
       });
+  };
+  const removeSelected = (user) => {
+    let current = 0;
+    const removeSelf = (oldFriends, friendId, callback) => {
+      let newFriends = oldFriends;
+
+      const index = newFriends.indexOf(friendId);
+      if (index > -1) {
+        newFriends.splice(index, 1);
+      }
+      callback(newFriends);
+    };
+    const removeOther = (otherId, callback) => {
+      getUser(otherId, (otherSnap) => {
+        let newFriends = otherSnap.data().friends;
+
+        const index = newFriends.indexOf(props.user.uid);
+        if (index > -1) {
+          newFriends.splice(index, 1);
+        }
+
+        updateFieldToUser(otherId, "friends", newFriends, callback);
+      });
+    };
+
+    getUser(props.user.uid, (selfSnap) => {
+      let oldFriends = selfSnap.data().friends;
+
+      selectedRequests.forEach((friendId) => {
+        removeOther(friendId, () => {
+          removeSelf(oldFriends, friendId, (newFriends) => {
+            oldFriends = newFriends;
+            current++;
+            if (current === selectedRequests.length) {
+              updateFieldToUser(props.user.uid, "friends", newFriends, () => {
+                setSelectedRequests([]);
+                props.setSnackbarText(`Selected friends removed.`);
+                props.setSnackbarOpen(true);
+                setAreYouSureOpen(false);
+              });
+            }
+          });
+        });
+      });
+    });
   };
   const addFriend = (event) => {
     event.preventDefault();
@@ -146,17 +203,22 @@ function FriendListTab(props) {
         let usernameStore = friendStoreSnap.data().usernames;
 
         if (usernameStore.hasOwnProperty(inputEl.value)) {
-          addOutgoingFriendToSelf(props.user, usernameStore, () => {
-            addIncomingFriendToOther(
-              props.user,
-              inputEl.value,
-              usernameStore,
-              () => {
-                props.setSnackbarText(`Sent Friend Request.`);
-                props.setSnackbarOpen(true);
-              }
-            );
-          });
+          if (usernameStore[inputEl.value] !== props.user.uid) {
+            addOutgoingFriendToSelf(props.user, usernameStore, () => {
+              addIncomingFriendToOther(
+                props.user,
+                inputEl.value,
+                usernameStore,
+                () => {
+                  props.setSnackbarText(`Sent Friend Request.`);
+                  props.setSnackbarOpen(true);
+                }
+              );
+            });
+          } else {
+            props.setSnackbarText(`You can not add yourself.`);
+            props.setSnackbarOpen(true);
+          }
         } else {
           props.setSnackbarText(`No user with that name exists.`);
           props.setSnackbarOpen(true);
@@ -165,14 +227,63 @@ function FriendListTab(props) {
     });
     setAddFriendOpen(false);
   };
+  const declineSelectedRequests = () => {
+    const declineFriendRequestSelf = (otherId, callback) => {
+      getUser(props.user.uid, (selfSnap) => {
+        if (selfSnap.exists) {
+          let oldIncoming = selfSnap.data().incomingFriendRequests;
+          const index = oldIncoming.indexOf(otherId);
+          if (index > -1) {
+            oldIncoming.splice(index, 1);
+          }
+
+          updateFieldToUser(
+            props.user.uid,
+            "incomingFriendRequests",
+            oldIncoming,
+            callback
+          );
+        }
+      });
+    };
+    const declineFriendRequestOther = (otherId) => {
+      getUser(otherId, (otherSnap) => {
+        if (otherSnap.exists) {
+          let oldOutgoing = otherSnap.data().outgoingFriendRequests;
+          const index = oldOutgoing.indexOf(props.user.uid);
+          if (index > -1) {
+            oldOutgoing.splice(index, 1);
+          }
+
+          updateFieldToUser(
+            otherId,
+            "outgoingFriendRequests",
+            oldOutgoing,
+            () => {}
+          );
+        }
+      });
+    };
+
+    selectedRequests.forEach((otherId) => {
+      declineFriendRequestSelf(otherId, () => {
+        declineFriendRequestOther(otherId);
+      });
+    });
+    if (selectedRequests.length > 0) {
+      setSelectedRequests([]);
+      props.setSnackbarText(`Declined selected requests.`);
+      props.setSnackbarOpen(true);
+      setAcceptFriendsOpen(false);
+    } else {
+      props.setSnackbarText(`No requests selected.`);
+      props.setSnackbarOpen(true);
+    }
+  };
   const acceptSelectedRequests = (event) => {
     const acceptFriendRequest = (userId, otherId, callback) => {
       getUser(userId, (selfSnap) => {
-        if (
-          selfSnap.exists &&
-          selfSnap.data().hasOwnProperty("friends") &&
-          !selfSnap.data().friends.includes(otherId)
-        ) {
+        if (selfSnap.exists && !selfSnap.data().friends.includes(otherId)) {
           let tempFriends = selfSnap.data().friends;
 
           tempFriends.push(otherId);
@@ -182,7 +293,6 @@ function FriendListTab(props) {
           });
         } else if (
           selfSnap.exists &&
-          selfSnap.data().hasOwnProperty("friends") &&
           selfSnap.data().friends.includes(otherId)
         ) {
           props.setSnackbarText(`You are already friends.`);
@@ -219,14 +329,15 @@ function FriendListTab(props) {
                     "outgoingFriendRequests",
                     myTempOutgoing,
                     () => {
-                      let oldSelected = selectedRequests;
+                      let newSelected = [];
 
-                      const indexC = oldSelected.indexOf(otherId);
-                      if (indexC > -1) {
-                        oldSelected.splice(indexC, 1);
-                      }
+                      selectedRequests.forEach((request) => {
+                        if (request !== otherId) {
+                          newSelected.push(otherId);
+                        }
+                      });
 
-                      setSelectedRequests(oldSelected);
+                      setSelectedRequests(newSelected);
                     }
                   );
                 });
@@ -236,8 +347,15 @@ function FriendListTab(props) {
         });
       });
     });
-    props.setSnackbarText(`Accepted selected friend requests.`);
-    props.setSnackbarOpen(true);
+    if (selectedRequests.length > 0) {
+      setSelectedRequests([]);
+      props.setSnackbarText(`Accepted selected requests.`);
+      props.setSnackbarOpen(true);
+      setAcceptFriendsOpen(false);
+    } else {
+      props.setSnackbarText(`No requests selected.`);
+      props.setSnackbarOpen(true);
+    }
   };
 
   React.useEffect(() => {
@@ -255,6 +373,38 @@ function FriendListTab(props) {
 
   return (
     <div className="FriendsListTab">
+      <Dialog open={areYouSureOpen} onClose={closeAreYouSure}>
+        <DialogTitle>Remove Selected Friends</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Clicking the remove button will remove the friends listed below.
+          </DialogContentText>
+          <List className="FriendsListTab-List">
+            {selectedRequests.map((friendId, id) => (
+              <FriendInList
+                checkbox={false}
+                friendId={friendId}
+                setSelectedRequests={setSelectedRequests}
+                selectedRequests={selectedRequests}
+                {...props}
+                key={id}
+              />
+            ))}
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeAreYouSure} color="primary">
+            Cancel
+          </Button>
+          <Button
+            color="secondary"
+            variant="contained"
+            onClick={removeSelected}
+          >
+            Remove Selected
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Dialog open={acceptFriendsOpen} onClose={closeAcceptFriends}>
         <DialogTitle>Pending Friend Requests</DialogTitle>
         <DialogContent>
@@ -264,6 +414,7 @@ function FriendListTab(props) {
           <List className="FriendsListTab-List">
             {pendingRequests.map((friendId, id) => (
               <FriendInList
+                checkbox={true}
                 friendId={friendId}
                 setSelectedRequests={setSelectedRequests}
                 selectedRequests={selectedRequests}
@@ -284,7 +435,11 @@ function FriendListTab(props) {
           >
             Accept Selected
           </Button>
-          <Button color="secondary" variant="contained" disabled>
+          <Button
+            color="secondary"
+            variant="contained"
+            onClick={declineSelectedRequests}
+          >
             Decline Selected
           </Button>
         </DialogActions>
@@ -323,6 +478,7 @@ function FriendListTab(props) {
           <Divider />
           {props.friends.map((friendId, id) => (
             <FriendInList
+              checkbox={true}
               friendId={friendId}
               setSelectedRequests={setSelectedRequests}
               selectedRequests={selectedRequests}
@@ -415,7 +571,7 @@ function FriendListTab(props) {
               <ListItemText primary="Add Friend" />
             </ListItem>
             <Divider variant="inset" />
-            <ListItem button disabled>
+            <ListItem button onClick={openAreYouSure}>
               <ListItemIcon>
                 <DeleteForeverIcon />
               </ListItemIcon>
