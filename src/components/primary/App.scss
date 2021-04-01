@@ -25,7 +25,40 @@
   }
 
   .LoginVisible {
+    margin-right: 16px;
     display: inherit;
+
+    .App-UserSettings {
+      width: 200px;
+      display: flex;
+      flex-direction: row;
+
+      .App-SettingsButton {
+        margin: 8px;
+      }
+
+      .SpacerA {
+        flex-grow: 1;
+      }
+
+      .App-Avatar {
+        .Badge-Online span {
+          background-color: rgb(67, 181, 129);
+        }
+        .Badge-Offline span {
+          background-color: rgb(150, 150, 150);
+        }
+        .Badge-Away span {
+          background-color: rgb(250, 166, 26);
+        }
+        .Badge-DnD span {
+          background-color: rgb(240, 71, 71);
+        }
+        .Badge-Error span {
+          background-color: rgb(255, 0, 0);
+        }
+      }
+    }
   }
   .LoginInvisible {
     display: none;

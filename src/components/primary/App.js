@@ -19,6 +19,12 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import TextField from "@material-ui/core/TextField";
 import Divider from "@material-ui/core/Divider";
+import Paper from "@material-ui/core/Paper";
+import MicIcon from "@material-ui/icons/Mic";
+import Popover from "@material-ui/core/Popover";
+import Avatar from "@material-ui/core/Avatar";
+import Badge from "@material-ui/core/Badge";
+import PersonIcon from "@material-ui/icons/Person";
 
 import firebase from "firebase/app";
 import "firebase/auth";
@@ -172,16 +178,26 @@ function ProfMenu(props) {
   const history = useHistory();
 
   const [profBtnAnchorEl, setProfBtnAnchorEl] = React.useState(null);
+  const [statusMenuAnchorEl, setStatusMenuAnchorEl] = React.useState(null);
+  const statusMenuOpen = Boolean(statusMenuAnchorEl);
   const [toProfileAllowed, setToProfileAllowed] = React.useState(
     !(history.location.pathname === "/account/profile")
   );
   const profBtnOpen = Boolean(profBtnAnchorEl);
+  const [pfpBlob, setPfpBlob] = React.useState("");
+  const [status, setStatus] = React.useState(false);
+
+  let db = firebase.firestore();
+  let user = firebase.auth().currentUser;
 
   const handleMenu = (event) => {
     setProfBtnAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
     setProfBtnAnchorEl(null);
+  };
+  const handleCloseStatusMenu = () => {
+    setStatusMenuAnchorEl(null);
   };
   const toProfile = () => {
     setProfBtnAnchorEl(null);
@@ -191,8 +207,45 @@ function ProfMenu(props) {
     setProfBtnAnchorEl(null);
     firebase.auth().signOut();
   };
+  const setOnline = () => {
+    db.collection("users").doc(user.uid).update({
+      status: "Online",
+    });
+  };
+  const setOffline = () => {
+    db.collection("users").doc(user.uid).update({
+      status: "Offline",
+    });
+  };
+  const setAway = () => {
+    db.collection("users").doc(user.uid).update({
+      status: "Away",
+    });
+  };
+  const setDnD = () => {
+    db.collection("users").doc(user.uid).update({
+      status: "DnD",
+    });
+  };
+
+  const handleStatusMenu = (event) => {
+    setStatusMenuAnchorEl(event.currentTarget);
+  };
 
   React.useEffect(() => {
+    firebase.auth().onAuthStateChanged((tempUser) => {
+      if (tempUser) {
+        user = tempUser;
+        db.collection("users")
+          .doc(user.uid)
+          .onSnapshot((snapshot) => {
+            setPfpBlob(snapshot.data().pfp);
+            setStatus(snapshot.data().status);
+          });
+      } else {
+        user = undefined;
+      }
+    });
     history.listen((location, action) => {
       if (action === "PUSH" && location.pathname === "/account/profile") {
         setToProfileAllowed(false);
@@ -207,29 +260,75 @@ function ProfMenu(props) {
 
   return (
     <div>
-      <IconButton onClick={handleMenu} color="inherit">
-        <SettingsIcon />
-      </IconButton>
-      <Menu
+      <Paper className="App-UserSettings">
+        <IconButton
+          className="App-Avatar"
+          color="inherit"
+          onClick={handleStatusMenu}
+        >
+          <Badge className={`Badge-${status}`} variant="dot">
+            <div>
+              <Avatar src={pfpBlob}>
+                <PersonIcon className="PersonIcon" />
+              </Avatar>
+            </div>
+          </Badge>
+        </IconButton>
+        <div className="SpacerA" />
+        <IconButton
+          className="App-SettingsButton"
+          onClick={handleMenu}
+          color="inherit"
+        >
+          <SettingsIcon />
+        </IconButton>
+      </Paper>
+      <Popover
         id="menu-appbar"
-        anchorEl={profBtnAnchorEl}
+        open={statusMenuOpen}
+        onClose={handleCloseStatusMenu}
+        anchorEl={statusMenuAnchorEl}
         anchorOrigin={{
-          vertical: "top",
-          horizontal: "right",
+          vertical: "bottom",
+          horizontal: "center",
         }}
-        keepMounted
         transformOrigin={{
           vertical: "top",
-          horizontal: "right",
+          horizontal: "center",
         }}
+      >
+        <MenuItem onClick={setOnline} disabled={status === "Online"}>
+          Go Online
+        </MenuItem>
+        <MenuItem onClick={setOffline} disabled={status === "Offline"}>
+          Go Offline
+        </MenuItem>
+        <MenuItem onClick={setAway} disabled={status === "Away"}>
+          Go Away
+        </MenuItem>
+        <MenuItem onClick={setDnD} disabled={status === "DnD"}>
+          Go Do Not Disturb
+        </MenuItem>
+      </Popover>
+      <Popover
+        id="menu-appbar"
         open={profBtnOpen}
         onClose={handleClose}
+        anchorEl={profBtnAnchorEl}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
       >
         <MenuItem onClick={toProfile} disabled={!toProfileAllowed}>
           Profile
         </MenuItem>
         <MenuItem onClick={logOut}>Logout</MenuItem>
-      </Menu>
+      </Popover>
     </div>
   );
 }
@@ -248,7 +347,7 @@ function App(props) {
     selfTags: [],
     incomingFriendRequests: [],
     outgoingFriendRequests: [],
-    status: "Error",
+    status: "Online",
   };
 
   // Functions
