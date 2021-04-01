@@ -146,64 +146,38 @@ function FriendListTab(props) {
     let inputEl = document.getElementById("AddFriendName");
     const addOutgoingFriendToSelf = (selfUser, usernameStore, callback) => {
       getUser(selfUser.uid, (selfSnap) => {
-        if (
-          selfSnap.exists &&
-          selfSnap.data().hasOwnProperty("friends") &&
-          !selfSnap.data().friends.includes(usernameStore[inputEl.value])
-        ) {
+        if (selfSnap.exists && selfSnap.data().hasOwnProperty("friends") && !selfSnap.data().friends.includes(usernameStore[inputEl.value])) {
           if (selfSnap.data().hasOwnProperty("outgoingFriendRequests")) {
             let tempOutgoing = selfSnap.data().outgoingFriendRequests;
 
             if (!tempOutgoing.includes(usernameStore[inputEl.value])) {
               tempOutgoing.push(usernameStore[inputEl.value]);
 
-              updateFieldToUser(
-                selfUser.uid,
-                "outgoingFriendRequests",
-                tempOutgoing,
-                () => {
-                  callback();
-                }
-              );
+              updateFieldToUser(selfUser.uid, "outgoingFriendRequests", tempOutgoing, () => {
+                callback();
+              });
             } else {
               props.setSnackbarText(`Already sent friend request.`);
               props.setSnackbarOpen(true);
             }
           }
-        } else if (
-          selfSnap.exists &&
-          selfSnap.data().hasOwnProperty("friends") &&
-          selfSnap.data().friends.includes(usernameStore[inputEl.value])
-        ) {
+        } else if (selfSnap.exists && selfSnap.data().hasOwnProperty("friends") && selfSnap.data().friends.includes(usernameStore[inputEl.value])) {
           props.setSnackbarText(`You are already friends.`);
           props.setSnackbarOpen(true);
         }
       });
     };
-    const addIncomingFriendToOther = (
-      selfUser,
-      otherUsername,
-      usernameStore,
-      callback
-    ) => {
+    const addIncomingFriendToOther = (selfUser, otherUsername, usernameStore, callback) => {
       getUser(usernameStore[otherUsername], (otherSnap) => {
-        if (
-          otherSnap.exists &&
-          otherSnap.data().hasOwnProperty("incomingFriendRequests")
-        ) {
+        if (otherSnap.exists && otherSnap.data().hasOwnProperty("incomingFriendRequests")) {
           let tempIncoming = otherSnap.data().incomingFriendRequests;
 
           if (!tempIncoming.includes(usernameStore[otherUsername])) {
             tempIncoming.push(selfUser.uid);
 
-            updateFieldToUser(
-              usernameStore[otherUsername],
-              "incomingFriendRequests",
-              tempIncoming,
-              () => {
-                callback();
-              }
-            );
+            updateFieldToUser(usernameStore[otherUsername], "incomingFriendRequests", tempIncoming, () => {
+              callback();
+            });
           }
         }
       });
@@ -215,15 +189,10 @@ function FriendListTab(props) {
         if (usernameStore.hasOwnProperty(inputEl.value)) {
           if (usernameStore[inputEl.value] !== props.user.uid) {
             addOutgoingFriendToSelf(props.user, usernameStore, () => {
-              addIncomingFriendToOther(
-                props.user,
-                inputEl.value,
-                usernameStore,
-                () => {
-                  props.setSnackbarText(`Sent Friend Request.`);
-                  props.setSnackbarOpen(true);
-                }
-              );
+              addIncomingFriendToOther(props.user, inputEl.value, usernameStore, () => {
+                props.setSnackbarText(`Sent Friend Request.`);
+                props.setSnackbarOpen(true);
+              });
             });
           } else {
             props.setSnackbarText(`You can not add yourself.`);
@@ -247,12 +216,7 @@ function FriendListTab(props) {
             oldIncoming.splice(index, 1);
           }
 
-          updateFieldToUser(
-            props.user.uid,
-            "incomingFriendRequests",
-            oldIncoming,
-            callback
-          );
+          updateFieldToUser(props.user.uid, "incomingFriendRequests", oldIncoming, callback);
         }
       });
     };
@@ -265,12 +229,7 @@ function FriendListTab(props) {
             oldOutgoing.splice(index, 1);
           }
 
-          updateFieldToUser(
-            otherId,
-            "outgoingFriendRequests",
-            oldOutgoing,
-            () => {}
-          );
+          updateFieldToUser(otherId, "outgoingFriendRequests", oldOutgoing, () => {});
         }
       });
     };
@@ -301,10 +260,7 @@ function FriendListTab(props) {
           updateFieldToUser(userId, "friends", tempFriends, () => {
             callback();
           });
-        } else if (
-          selfSnap.exists &&
-          selfSnap.data().friends.includes(otherId)
-        ) {
+        } else if (selfSnap.exists && selfSnap.data().friends.includes(otherId)) {
           props.setSnackbarText(`You are already friends.`);
           props.setSnackbarOpen(true);
         }
@@ -321,38 +277,28 @@ function FriendListTab(props) {
               myTempIncoming.splice(indexA, 1);
             }
 
-            updateFieldToUser(
-              props.user.uid,
-              "incomingFriendRequests",
-              myTempIncoming,
-              () => {
-                getUser(otherId, (otherSnap) => {
-                  let myTempOutgoing = otherSnap.data().outgoingFriendRequests;
+            updateFieldToUser(props.user.uid, "incomingFriendRequests", myTempIncoming, () => {
+              getUser(otherId, (otherSnap) => {
+                let myTempOutgoing = otherSnap.data().outgoingFriendRequests;
 
-                  const indexB = myTempOutgoing.indexOf(props.user.uid);
-                  if (indexB > -1) {
-                    myTempOutgoing.splice(indexB, 1);
-                  }
+                const indexB = myTempOutgoing.indexOf(props.user.uid);
+                if (indexB > -1) {
+                  myTempOutgoing.splice(indexB, 1);
+                }
 
-                  updateFieldToUser(
-                    otherId,
-                    "outgoingFriendRequests",
-                    myTempOutgoing,
-                    () => {
-                      let newSelected = [];
+                updateFieldToUser(otherId, "outgoingFriendRequests", myTempOutgoing, () => {
+                  let newSelected = [];
 
-                      selectedRequests.forEach((request) => {
-                        if (request !== otherId) {
-                          newSelected.push(otherId);
-                        }
-                      });
-
-                      setSelectedRequests(newSelected);
+                  selectedRequests.forEach((request) => {
+                    if (request !== otherId) {
+                      newSelected.push(otherId);
                     }
-                  );
+                  });
+
+                  setSelectedRequests(newSelected);
                 });
-              }
-            );
+              });
+            });
           });
         });
       });
@@ -386,19 +332,10 @@ function FriendListTab(props) {
       <Dialog open={areYouSureOpen} onClose={closeAreYouSure}>
         <DialogTitle>Remove Selected Friends</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Clicking the remove button will remove the friends listed below.
-          </DialogContentText>
+          <DialogContentText>Clicking the remove button will remove the friends listed below.</DialogContentText>
           <List className="FriendsListTab-List">
             {selectedRequests.map((friendId, id) => (
-              <FriendInList
-                checkbox={false}
-                friendId={friendId}
-                setSelectedRequests={setSelectedRequests}
-                selectedRequests={selectedRequests}
-                {...props}
-                key={id}
-              />
+              <FriendInList checkbox={false} friendId={friendId} setSelectedRequests={setSelectedRequests} selectedRequests={selectedRequests} {...props} key={id} />
             ))}
           </List>
         </DialogContent>
@@ -406,11 +343,7 @@ function FriendListTab(props) {
           <Button onClick={closeAreYouSure} color="primary">
             Cancel
           </Button>
-          <Button
-            color="secondary"
-            variant="contained"
-            onClick={removeSelected}
-          >
+          <Button color="secondary" variant="contained" onClick={removeSelected}>
             Remove Selected
           </Button>
         </DialogActions>
@@ -418,19 +351,10 @@ function FriendListTab(props) {
       <Dialog open={acceptFriendsOpen} onClose={closeAcceptFriends}>
         <DialogTitle>Pending Friend Requests</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Use this area to accept or decline friend requests.
-          </DialogContentText>
+          <DialogContentText>Use this area to accept or decline friend requests.</DialogContentText>
           <List className="FriendsListTab-List">
             {pendingRequests.map((friendId, id) => (
-              <FriendInList
-                checkbox={true}
-                friendId={friendId}
-                setSelectedRequests={setSelectedRequests}
-                selectedRequests={selectedRequests}
-                {...props}
-                key={id}
-              />
+              <FriendInList checkbox={true} friendId={friendId} setSelectedRequests={setSelectedRequests} selectedRequests={selectedRequests} {...props} key={id} />
             ))}
           </List>
         </DialogContent>
@@ -438,18 +362,10 @@ function FriendListTab(props) {
           <Button onClick={closeAcceptFriends} color="primary">
             Cancel
           </Button>
-          <Button
-            color="secondary"
-            variant="contained"
-            onClick={acceptSelectedRequests}
-          >
+          <Button color="secondary" variant="contained" onClick={acceptSelectedRequests}>
             Accept Selected
           </Button>
-          <Button
-            color="secondary"
-            variant="contained"
-            onClick={declineSelectedRequests}
-          >
+          <Button color="secondary" variant="contained" onClick={declineSelectedRequests}>
             Decline Selected
           </Button>
         </DialogActions>
@@ -457,18 +373,9 @@ function FriendListTab(props) {
       <Dialog open={addFriendOpen} onClose={closeAddFriend}>
         <DialogTitle>Add Friend</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            To add a new friend, please input their username.
-          </DialogContentText>
+          <DialogContentText>To add a new friend, please input their username.</DialogContentText>
           <form noValidate autoComplete="off" onSubmit={addFriend}>
-            <TextField
-              id="AddFriendName"
-              color="secondary"
-              margin="dense"
-              label="Friend Name"
-              type="text"
-              fullWidth
-            />
+            <TextField id="AddFriendName" color="secondary" margin="dense" label="Friend Name" type="text" fullWidth />
           </form>
         </DialogContent>
         <DialogActions>
@@ -481,20 +388,10 @@ function FriendListTab(props) {
         </DialogActions>
       </Dialog>
       <Paper className="FriendsListTab-ListPaper" variant="outlined">
-        <List
-          className="FriendsListTab-List"
-          subheader={<ListSubheader component="div">{`Friends`}</ListSubheader>}
-        >
+        <List className="FriendsListTab-List" subheader={<ListSubheader component="div">{`Friends`}</ListSubheader>}>
           <Divider />
           {props.friends.map((friendId, id) => (
-            <FriendInList
-              checkbox={true}
-              friendId={friendId}
-              setSelectedRequests={setSelectedRequests}
-              selectedRequests={selectedRequests}
-              {...props}
-              key={id}
-            />
+            <FriendInList checkbox={true} friendId={friendId} setSelectedRequests={setSelectedRequests} selectedRequests={selectedRequests} {...props} key={id} />
           ))}
         </List>
       </Paper>
@@ -515,44 +412,28 @@ function FriendListTab(props) {
             }}
           >
             <List className="FriendsListTab-List">
-              <ListItem
-                button
-                disabled={currentSorting === "OnlineFirst"}
-                onClick={() => setCurrentSorting("OnlineFirst")}
-              >
+              <ListItem button disabled={currentSorting === "OnlineFirst"} onClick={() => setCurrentSorting("OnlineFirst")}>
                 <ListItemIcon>
                   <FilterListIcon />
                 </ListItemIcon>
                 <ListItemText primary="Online (First)" />
               </ListItem>
               <Divider variant="inset" />
-              <ListItem
-                button
-                disabled={currentSorting === "OnlineLast"}
-                onClick={() => setCurrentSorting("OnlineLast")}
-              >
+              <ListItem button disabled={currentSorting === "OnlineLast"} onClick={() => setCurrentSorting("OnlineLast")}>
                 <ListItemIcon>
                   <FilterListIcon />
                 </ListItemIcon>
                 <ListItemText primary="Online (Last)" />
               </ListItem>
               <Divider variant="inset" />
-              <ListItem
-                button
-                disabled={currentSorting === "NameAZ"}
-                onClick={() => setCurrentSorting("NameAZ")}
-              >
+              <ListItem button disabled={currentSorting === "NameAZ"} onClick={() => setCurrentSorting("NameAZ")}>
                 <ListItemIcon>
                   <FilterListIcon />
                 </ListItemIcon>
                 <ListItemText primary="Name (A-Z)" />
               </ListItem>
               <Divider variant="inset" />
-              <ListItem
-                button
-                disabled={currentSorting === "NameZA"}
-                onClick={() => setCurrentSorting("NameZA")}
-              >
+              <ListItem button disabled={currentSorting === "NameZA"} onClick={() => setCurrentSorting("NameZA")}>
                 <ListItemIcon>
                   <FilterListIcon />
                 </ListItemIcon>
@@ -562,29 +443,17 @@ function FriendListTab(props) {
           </Popover>
           <ListSubheader component="div">Friend Sorting</ListSubheader>
           <Divider />
-          <Button
-            variant="contained"
-            onClick={openSort}
-            className="FriendsListTab-SortButton"
-          >
+          <Button variant="contained" onClick={openSort} className="FriendsListTab-SortButton">
             Set Sorting
           </Button>
         </Paper>
         <Paper className="FriendsListTab-Actions" variant="outlined">
-          <List
-            className="FriendsListTab-List"
-            subheader={
-              <ListSubheader component="div">Friend Actions</ListSubheader>
-            }
-          >
+          <List className="FriendsListTab-List" subheader={<ListSubheader component="div">Friend Actions</ListSubheader>}>
             <Divider />
             {pendingRequests.length > 0 && (
               <ListItem button onClick={openAcceptFriends}>
                 <ListItemIcon>
-                  <Badge
-                    badgeContent={pendingRequests.length}
-                    color="secondary"
-                  >
+                  <Badge badgeContent={pendingRequests.length} color="secondary">
                     <FilterListIcon />
                   </Badge>
                 </ListItemIcon>

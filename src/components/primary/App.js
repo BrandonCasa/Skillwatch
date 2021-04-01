@@ -31,12 +31,7 @@ import "firebase/auth";
 import "firebase/messaging";
 import "firebase/firestore";
 
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  useHistory,
-} from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route, useHistory } from "react-router-dom";
 import "./App.scss";
 
 import HomeContainer from "../../containers/HomeContainer";
@@ -124,29 +119,10 @@ function LoginRegisterBtn(props) {
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Login</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            If you don't own an account, begin typing an email to create one.
-          </DialogContentText>
+          <DialogContentText>If you don't own an account, begin typing an email to create one.</DialogContentText>
           {errorText === "" ? null : <h1>{errorText}</h1>}
-          <TextField
-            color="secondary"
-            autoFocus
-            margin="dense"
-            label="Email Address"
-            type="email"
-            fullWidth
-            onInput={onEmailInput}
-            value={email}
-          />
-          <TextField
-            color="secondary"
-            margin="dense"
-            label="Password"
-            type="password"
-            fullWidth
-            onInput={onPassInput}
-            value={pass}
-          />
+          <TextField color="secondary" autoFocus margin="dense" label="Email Address" type="email" fullWidth onInput={onEmailInput} value={email} />
+          <TextField color="secondary" margin="dense" label="Password" type="password" fullWidth onInput={onPassInput} value={pass} />
           <Typography variant="subtitle2" color="primary">
             (other login methods will be added in a future update)
           </Typography>
@@ -161,11 +137,7 @@ function LoginRegisterBtn(props) {
         </DialogActions>
         <Divider />
         <DialogActions>
-          <Button
-            onClick={signInWithGoogle}
-            color="secondary"
-            variant="contained"
-          >
+          <Button onClick={signInWithGoogle} color="secondary" variant="contained">
             Login With Google
           </Button>
         </DialogActions>
@@ -180,9 +152,7 @@ function ProfMenu(props) {
   const [profBtnAnchorEl, setProfBtnAnchorEl] = React.useState(null);
   const [statusMenuAnchorEl, setStatusMenuAnchorEl] = React.useState(null);
   const statusMenuOpen = Boolean(statusMenuAnchorEl);
-  const [toProfileAllowed, setToProfileAllowed] = React.useState(
-    !(history.location.pathname === "/account/profile")
-  );
+  const [toProfileAllowed, setToProfileAllowed] = React.useState(!(history.location.pathname === "/account/profile"));
   const profBtnOpen = Boolean(profBtnAnchorEl);
   const [pfpBlob, setPfpBlob] = React.useState("");
   const [status, setStatus] = React.useState(false);
@@ -249,10 +219,7 @@ function ProfMenu(props) {
     history.listen((location, action) => {
       if (action === "PUSH" && location.pathname === "/account/profile") {
         setToProfileAllowed(false);
-      } else if (
-        action === "PUSH" &&
-        !(location.pathname === "/account/profile")
-      ) {
+      } else if (action === "PUSH" && !(location.pathname === "/account/profile")) {
         setToProfileAllowed(true);
       }
     });
@@ -261,12 +228,15 @@ function ProfMenu(props) {
   return (
     <div>
       <Paper className="App-UserSettings">
-        <IconButton
-          className="App-Avatar"
-          color="inherit"
-          onClick={handleStatusMenu}
-        >
-          <Badge className={`Badge-${status}`} variant="dot">
+        <IconButton className="App-Avatar" color="inherit" onClick={handleStatusMenu}>
+          <Badge
+            className={`Badge Badge-${status}`}
+            variant="dot"
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+          >
             <div>
               <Avatar src={pfpBlob}>
                 <PersonIcon className="PersonIcon" />
@@ -275,11 +245,7 @@ function ProfMenu(props) {
           </Badge>
         </IconButton>
         <div className="SpacerA" />
-        <IconButton
-          className="App-SettingsButton"
-          onClick={handleMenu}
-          color="inherit"
-        >
+        <IconButton className="App-SettingsButton" onClick={handleMenu} color="inherit">
           <SettingsIcon />
         </IconButton>
       </Paper>
@@ -392,9 +358,7 @@ function App(props) {
         [fieldName]: fieldValue,
       })
       .then(function () {
-        console.log(
-          `Successfully updated the user's field called "${fieldName}" to be "${fieldValue}"`
-        );
+        console.log(`Successfully updated the user's field called "${fieldName}" to be "${fieldValue}"`);
         if (callback !== undefined) callback(true);
       })
       .catch(function (error) {
@@ -521,12 +485,7 @@ function App(props) {
           </AppBar>
           <Switch>
             <Route path="/messaging">
-              <MessagingContainer
-                checkUserExists={checkUserExists}
-                loggedIn={loggedIn}
-                user={user}
-                database={db}
-              />
+              <MessagingContainer checkUserExists={checkUserExists} loggedIn={loggedIn} user={user} database={db} />
             </Route>
             <Route path="/account/profile">
               <ProfileContainer loggedIn={loggedIn} user={user} database={db} />

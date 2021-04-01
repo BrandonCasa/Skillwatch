@@ -1,0 +1,23 @@
+.FriendChannel-Content {
+  .Badge span {
+    transform: translate(-2px, -2px);
+    height: 12px;
+    width: 12px;
+    border-radius: 6px;
+  }
+  .Badge-Online span {
+    background-color: rgb(67, 181, 129);
+  }
+  .Badge-Offline span {
+    background-color: rgb(150, 150, 150);
+  }
+  .Badge-Away span {
+    background-color: rgb(250, 166, 26);
+  }
+  .Badge-DnD span {
+    background-color: rgb(240, 71, 71);
+  }
+  .Badge-Error span {
+    background-color: rgb(255, 0, 0);
+  }
+}

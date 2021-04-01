@@ -14,10 +14,43 @@
       width: 250px;
       padding: 8px;
       flex-grow: 1;
+      display: flex;
+      flex-direction: column;
 
-      .CurrentChannel-ChatList {
+      .CurrentChannel-ChatWindow {
         flex-grow: 1;
-        padding: 8px;
+        display: flex;
+        flex-direction: column;
+
+        .CurrentChannel-ChatInput {
+          display: flex;
+          flex-direction: row;
+          height: 48px;
+          padding: 8px;
+
+          .CurrentChannel-ChatTextField {
+            height: 32px;
+          }
+
+          .CurrentChannel-AddButton {
+            width: 32px;
+            height: 32px;
+            padding: 4px;
+            margin-right: 16px;
+          }
+
+          .CurrentChannel-SendButton {
+            width: 32px;
+            height: 32px;
+            padding: 4px;
+            margin-left: 16px;
+          }
+        }
+
+        .CurrentChannel-ChatList {
+          flex-grow: 1;
+          padding: 8px;
+        }
       }
     }
   }
@@ -29,7 +62,6 @@
 
     .CurrentChannel-SearchPaper {
       height: auto;
-      min-height: 200px;
       width: 250px;
       padding: 8px;
       margin-bottom: 8px;
@@ -37,6 +69,7 @@
       .CurrentChannel-SearchContent {
         display: flex;
         flex-direction: row;
+        padding: 8px 16px;
 
         .CurrentChannel-SearchButton {
           padding: 4px;

@@ -25,7 +25,6 @@
   }
 
   .LoginVisible {
-    margin-right: 16px;
     display: inherit;
 
     .App-UserSettings {
@@ -34,7 +33,6 @@
       flex-direction: row;
 
       .App-SettingsButton {
-        margin: 8px;
       }
 
       .SpacerA {
@@ -42,6 +40,14 @@
       }
 
       .App-Avatar {
+        padding: 4px;
+
+        .Badge span {
+          transform: translate(-2px, -2px);
+          height: 12px;
+          width: 12px;
+          border-radius: 6px;
+        }
         .Badge-Online span {
           background-color: rgb(67, 181, 129);
         }

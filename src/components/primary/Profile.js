@@ -100,13 +100,7 @@ function ProfileLoggedIn(props) {
             .doc("FriendStore")
             .get()
             .then((friendStoreSnap) => {
-              if (
-                !friendStoreSnap
-                  .data()
-                  .usernames.hasOwnProperty(
-                    document.getElementById("usernameInput").value
-                  )
-              ) {
+              if (!friendStoreSnap.data().usernames.hasOwnProperty(document.getElementById("usernameInput").value)) {
                 props.database
                   .collection("users")
                   .doc(props.user.uid)
@@ -117,15 +111,11 @@ function ProfileLoggedIn(props) {
                     let usernames = friendStoreSnap.data().usernames;
                     delete usernames[oldUsername];
 
-                    usernames[document.getElementById("usernameInput").value] =
-                      props.user.uid;
+                    usernames[document.getElementById("usernameInput").value] = props.user.uid;
 
-                    props.database
-                      .collection("users")
-                      .doc("FriendStore")
-                      .update({
-                        usernames: usernames,
-                      });
+                    props.database.collection("users").doc("FriendStore").update({
+                      usernames: usernames,
+                    });
                     console.log(`Successfully updated username.`);
                   })
                   .catch((error) => {
@@ -160,19 +150,11 @@ function ProfileLoggedIn(props) {
       .doc(passedProps.user.uid)
       .get()
       .then((snapshot) => {
-        if (
-          snapshot.exists &&
-          snapshot.data().username === passedProps.user.uid
-        ) {
+        if (snapshot.exists && snapshot.data().username === passedProps.user.uid) {
           document.getElementById("usernameInput").value = "";
           document.getElementById("bioInput").value = "";
-        } else if (
-          snapshot.exists &&
-          snapshot.data().username !== passedProps.user.uid
-        ) {
-          document.getElementById(
-            "usernameInput"
-          ).value = snapshot.data().username;
+        } else if (snapshot.exists && snapshot.data().username !== passedProps.user.uid) {
+          document.getElementById("usernameInput").value = snapshot.data().username;
           document.getElementById("bioInput").value = snapshot.data().bio;
         } else {
           document.getElementById("usernameInput").value = "";
@@ -196,12 +178,7 @@ function ProfileLoggedIn(props) {
             message={snackbarText}
             action={
               <>
-                <IconButton
-                  size="small"
-                  aria-label="close"
-                  color="inherit"
-                  onClick={closeSnackbar}
-                >
+                <IconButton size="small" aria-label="close" color="inherit" onClick={closeSnackbar}>
                   <CloseIcon fontSize="small" />
                 </IconButton>
               </>
@@ -212,16 +189,8 @@ function ProfileLoggedIn(props) {
             <Divider component="li" />
           </ListSubheader>
           <div className="PaperContent">
-            <IconButton
-              className="AvatarButton"
-              onMouseEnter={() => setAvatarHovered(true)}
-              onMouseLeave={() => setAvatarHovered(false)}
-              onClick={selectProfilePicture}
-            >
-              <Badge
-                badgeContent={<AddPhotoAlternateIcon className="EditIcon" />}
-                color="secondary"
-              >
+            <IconButton className="AvatarButton" onMouseEnter={() => setAvatarHovered(true)} onMouseLeave={() => setAvatarHovered(false)} onClick={selectProfilePicture}>
+              <Badge badgeContent={<AddPhotoAlternateIcon className="EditIcon" />} color="secondary">
                 <div className="Icons">
                   <Avatar
                     style={{
@@ -245,42 +214,13 @@ function ProfileLoggedIn(props) {
                   </Avatar>
                 </div>
               </Badge>
-              <input
-                id="pfpSelector"
-                type="file"
-                name="Profile Picture"
-                style={{ display: "none" }}
-                onChange={pfpChanged}
-                accept=".jpg, .jpeg, .png"
-              />
+              <input id="pfpSelector" type="file" name="Profile Picture" style={{ display: "none" }} onChange={pfpChanged} accept=".jpg, .jpeg, .png" />
             </IconButton>
-            <form
-              noValidate
-              autoComplete="off"
-              className="UsernameInput"
-              onSubmit={submitNewInfo}
-            >
-              <TextField
-                id="usernameInput"
-                label="Username"
-                className="Input"
-                color="secondary"
-                defaultValue=" "
-              />
+            <form noValidate autoComplete="off" className="UsernameInput" onSubmit={submitNewInfo}>
+              <TextField id="usernameInput" label="Username" className="Input" color="secondary" defaultValue=" " />
             </form>
-            <form
-              noValidate
-              autoComplete="off"
-              className="UsernameInput"
-              onSubmit={submitNewInfo}
-            >
-              <TextField
-                id="bioInput"
-                label="Bio"
-                className="Input"
-                color="secondary"
-                defaultValue=" "
-              />
+            <form noValidate autoComplete="off" className="UsernameInput" onSubmit={submitNewInfo}>
+              <TextField id="bioInput" label="Bio" className="Input" color="secondary" defaultValue=" " />
             </form>
             <IconButton className="SaveButton" onClick={submitNewInfo}>
               <SaveIcon />
@@ -352,13 +292,7 @@ function Profile(props) {
         </List>
         <Divider />
         <List>
-          <ListItem
-            button
-            disabled={true}
-            key={"Profile"}
-            component={Link}
-            to="/account/profile"
-          >
+          <ListItem button disabled={true} key={"Profile"} component={Link} to="/account/profile">
             <ListItemIcon>
               <AccountCircleIcon />
             </ListItemIcon>
@@ -371,11 +305,7 @@ function Profile(props) {
           ContentClosed: !props.primaryDrawerOpen,
         })}
       >
-        {props.loggedIn ? (
-          <ProfileLoggedIn {...props} />
-        ) : (
-          <ProfileNotLoggedIn {...props} />
-        )}
+        {props.loggedIn ? <ProfileLoggedIn {...props} /> : <ProfileNotLoggedIn {...props} />}
       </div>
     </div>
   );

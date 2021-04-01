@@ -12,11 +12,11 @@ import CloseIcon from "@material-ui/icons/Close";
 // SCSS
 import "./LoggedIn.scss";
 // Custom Components
-import CurrentChannelTab from "./CurrentChannelTab";
-import FriendListTab from "./FriendListTab";
+import CurrentChannelTab from "../../CurrentChannel/Components/CurrentChannelTab";
+import FriendListTab from "../../Friends/Components/FriendListTab";
 
 function LoggedIn(props) {
-  const [currentChannel, setCurrentChannel] = React.useState("Region");
+  const [currentChannel, setCurrentChannel] = React.useState("");
   const [currentTab, setCurrentTab] = React.useState(0);
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
   const [snackbarText, setSnackbarText] = React.useState("");
@@ -38,19 +38,15 @@ function LoggedIn(props) {
           <CurrentChannelTab
             setSnackbarOpen={setSnackbarOpen}
             setSnackbarText={setSnackbarText}
-            {...props}
-          />
-        );
-      case 1:
-        return (
-          <FriendListTab
-            setSnackbarOpen={setSnackbarOpen}
-            setSnackbarText={setSnackbarText}
             setFriends={setFriends}
+            currentChannel={currentChannel}
+            setCurrentChannel={setCurrentChannel}
             friends={friends}
             {...props}
           />
         );
+      case 1:
+        return <FriendListTab setSnackbarOpen={setSnackbarOpen} setSnackbarText={setSnackbarText} setFriends={setFriends} friends={friends} {...props} />;
       case 2:
         return "Blocked List";
       default:
@@ -66,6 +62,9 @@ function LoggedIn(props) {
         if (snapshot.exists) {
           if (snapshot.data().hasOwnProperty("friends")) {
             setFriends(snapshot.data().friends);
+            if (snapshot.data().friends.length > -1) {
+              setCurrentChannel(snapshot.data().friends[0]);
+            }
           }
         }
       });
@@ -74,12 +73,7 @@ function LoggedIn(props) {
   return (
     <>
       <AppBar position="static" className="LoggedIn-AppBar">
-        <Tabs
-          position="static"
-          value={currentTab}
-          onChange={changeTab}
-          className="LoggedIn-Tabs"
-        >
+        <Tabs position="static" value={currentTab} onChange={changeTab} className="LoggedIn-Tabs">
           <Tab label="Channel" />
           <Tab label="Friends List" />
           <Tab label="Blocked List" />
@@ -96,12 +90,7 @@ function LoggedIn(props) {
         message={snackbarText}
         action={
           <>
-            <IconButton
-              size="small"
-              aria-label="close"
-              color="inherit"
-              onClick={closeSnackbar}
-            >
+            <IconButton size="small" aria-label="close" color="inherit" onClick={closeSnackbar}>
               <CloseIcon fontSize="small" />
             </IconButton>
           </>
