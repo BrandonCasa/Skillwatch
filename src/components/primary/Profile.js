@@ -27,6 +27,9 @@ import ListSubheader from "@material-ui/core/ListSubheader";
 import TextField from "@material-ui/core/TextField";
 import SaveIcon from "@material-ui/icons/Save";
 import InputAdornment from "@material-ui/core/InputAdornment";
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import Snackbar from "@material-ui/core/Snackbar";
+import CloseIcon from "@material-ui/icons/Close";
 
 import { Link } from "react-router-dom";
 import "./Profile.scss";
@@ -40,11 +43,18 @@ function ProfileLoggedIn(props) {
   const [avatarHovered, setAvatarHovered] = React.useState(false);
   const [pfpBlob, setPfpBlob] = React.useState("");
   const [username, setUsername] = React.useState("");
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackbarText, setSnackbarText] = React.useState("");
 
   const selectProfilePicture = (event) => {
     document.getElementById("pfpSelector").click();
   };
-
+  const closeSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
   const pfpChanged = (event) => {
     passedProps.db
       .collection("users")
@@ -85,20 +95,25 @@ function ProfileLoggedIn(props) {
       .then((snapshot) => {
         if (snapshot.exists) {
           let oldUsername = snapshot.data().username;
-
           props.database
             .collection("users")
-            .doc(props.user.uid)
-            .update({
-              username: document.getElementById("usernameInput").value,
-            })
-            .then(() => {
-              props.database
-                .collection("users")
-                .doc("FriendStore")
-                .get()
-                .then((friendStoreSnap) => {
-                  if (friendStoreSnap.exists) {
+            .doc("FriendStore")
+            .get()
+            .then((friendStoreSnap) => {
+              if (
+                !friendStoreSnap
+                  .data()
+                  .usernames.hasOwnProperty(
+                    document.getElementById("usernameInput").value
+                  )
+              ) {
+                props.database
+                  .collection("users")
+                  .doc(props.user.uid)
+                  .update({
+                    username: document.getElementById("usernameInput").value,
+                  })
+                  .then(() => {
                     let usernames = friendStoreSnap.data().usernames;
                     delete usernames[oldUsername];
 
@@ -111,12 +126,16 @@ function ProfileLoggedIn(props) {
                       .update({
                         usernames: usernames,
                       });
-                  }
-                });
-              console.log(`Successfully updated username.`);
-            })
-            .catch((error) => {
-              console.error("Error updating username", error);
+                    console.log(`Successfully updated username.`);
+                  })
+                  .catch((error) => {
+                    console.error("Error updating username", error);
+                  });
+              } else {
+                setSnackbarText("Username already taken.");
+                setSnackbarOpen(true);
+                document.getElementById("usernameInput").value = oldUsername;
+              }
             });
         }
       });
@@ -166,6 +185,28 @@ function ProfileLoggedIn(props) {
     <div className="ProfileInner">
       <div className="Top">
         <Paper className="PaperTopLeft">
+          <Snackbar
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+            open={snackbarOpen}
+            autoHideDuration={3000}
+            onClose={closeSnackbar}
+            message={snackbarText}
+            action={
+              <>
+                <IconButton
+                  size="small"
+                  aria-label="close"
+                  color="inherit"
+                  onClick={closeSnackbar}
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </>
+            }
+          />
           <ListSubheader component="div" className="ListSubheader">
             Public Account
             <Divider component="li" />
@@ -291,7 +332,7 @@ function Profile(props) {
             <ChevronLeftIcon />
           </IconButton>
           <Typography variant="h6" className="Title">
-            Skillwatch
+            Skillchat
           </Typography>
         </Toolbar>
         <Divider />
@@ -302,20 +343,26 @@ function Profile(props) {
             </ListItemIcon>
             <ListItemText primary={"Home"} />
           </ListItem>
-          <ListItem button key={"Tracking"}>
-            <ListItemIcon>
-              <TrendingUpIcon />
-            </ListItemIcon>
-            <ListItemText primary={"Tracking"} />
-          </ListItem>
-        </List>
-        <Divider />
-        <List>
           <ListItem button key={"Messaging"} component={Link} to="/messaging">
             <ListItemIcon>
               <GroupIcon />
             </ListItemIcon>
             <ListItemText primary={"Messaging"} />
+          </ListItem>
+        </List>
+        <Divider />
+        <List>
+          <ListItem
+            button
+            disabled={true}
+            key={"Profile"}
+            component={Link}
+            to="/account/profile"
+          >
+            <ListItemIcon>
+              <AccountCircleIcon />
+            </ListItemIcon>
+            <ListItemText primary={"Profile"} />
           </ListItem>
         </List>
       </Drawer>

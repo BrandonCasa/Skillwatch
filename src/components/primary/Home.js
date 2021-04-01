@@ -5,7 +5,6 @@ import Drawer from "@material-ui/core/Drawer";
 import List from "@material-ui/core/List";
 import Divider from "@material-ui/core/Divider";
 import HomeIcon from "@material-ui/icons/Home";
-import TrendingUpIcon from "@material-ui/icons/TrendingUp";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
@@ -14,6 +13,7 @@ import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 
 import { Link } from "react-router-dom";
 import "./Home.scss";
@@ -57,7 +57,7 @@ function Home(props) {
             <ChevronLeftIcon />
           </IconButton>
           <Typography variant="h6" className="Title">
-            Skillwatch
+            Skillchat
           </Typography>
         </Toolbar>
         <Divider />
@@ -68,20 +68,25 @@ function Home(props) {
             </ListItemIcon>
             <ListItemText primary={"Home"} />
           </ListItem>
-          <ListItem button key={"Tracking"}>
-            <ListItemIcon>
-              <TrendingUpIcon />
-            </ListItemIcon>
-            <ListItemText primary={"Tracking"} />
-          </ListItem>
-        </List>
-        <Divider />
-        <List>
           <ListItem button key={"Messaging"} component={Link} to="/messaging">
             <ListItemIcon>
               <GroupIcon />
             </ListItemIcon>
             <ListItemText primary={"Messaging"} />
+          </ListItem>
+        </List>
+        <Divider />
+        <List>
+          <ListItem
+            button
+            key={"Profile"}
+            component={Link}
+            to="/account/profile"
+          >
+            <ListItemIcon>
+              <AccountCircleIcon />
+            </ListItemIcon>
+            <ListItemText primary={"Profile"} />
           </ListItem>
         </List>
       </Drawer>

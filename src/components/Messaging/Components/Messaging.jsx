@@ -14,6 +14,7 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import HomeIcon from "@material-ui/icons/Home";
 import GroupIcon from "@material-ui/icons/Group";
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 // SCSS
 import "./Messaging.scss";
 // Custom Components
@@ -43,7 +44,7 @@ function Messaging(props) {
             <ChevronLeftIcon />
           </IconButton>
           <Typography variant="h6" className="Title">
-            Skillwatch
+            Skillchat
           </Typography>
         </Toolbar>
         <Divider />
@@ -54,9 +55,6 @@ function Messaging(props) {
             </ListItemIcon>
             <ListItemText primary={"Home"} />
           </ListItem>
-        </List>
-        <Divider />
-        <List>
           <ListItem
             button
             key={"Messaging"}
@@ -68,6 +66,20 @@ function Messaging(props) {
               <GroupIcon />
             </ListItemIcon>
             <ListItemText primary={"Messaging"} />
+          </ListItem>
+        </List>
+        <Divider />
+        <List>
+          <ListItem
+            button
+            key={"Profile"}
+            component={Link}
+            to="/account/profile"
+          >
+            <ListItemIcon>
+              <AccountCircleIcon />
+            </ListItemIcon>
+            <ListItemText primary={"Profile"} />
           </ListItem>
         </List>
       </Drawer>

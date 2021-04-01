@@ -20,6 +20,7 @@ import ListSubheader from "@material-ui/core/ListSubheader";
 import PersonAddIcon from "@material-ui/icons/PersonAdd";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import Badge from "@material-ui/core/Badge";
+import Popover from "@material-ui/core/Popover";
 // SCSS
 import "./FriendListTab.scss";
 // Custom Components
@@ -32,12 +33,21 @@ function FriendListTab(props) {
   const [acceptFriendsOpen, setAcceptFriendsOpen] = React.useState(false);
   const [selectedRequests, setSelectedRequests] = React.useState([]);
   const [pendingRequests, setPendingRequests] = React.useState([]);
+  const [sortAnchor, setSortAnchor] = React.useState(null);
+  const sortOpen = Boolean(sortAnchor);
+  const sortId = sortOpen ? "simple-popover" : undefined;
 
   const closeAddFriend = () => {
     setAddFriendOpen(false);
   };
   const openAddFriend = () => {
     setAddFriendOpen(true);
+  };
+  const closeSort = () => {
+    setSortAnchor(null);
+  };
+  const openSort = (event) => {
+    setSortAnchor(event.currentTarget);
   };
   const closeAreYouSure = () => {
     setAreYouSureOpen(false);
@@ -490,57 +500,75 @@ function FriendListTab(props) {
       </Paper>
       <div className="FriendsListTab-RightBar">
         <Paper className="FriendsListTab-Sorting" variant="outlined">
-          <List
-            className="FriendsListTab-List"
-            subheader={
-              <ListSubheader component="div">Friend Sorting</ListSubheader>
-            }
+          <Popover
+            id={sortId}
+            open={sortOpen}
+            anchorEl={sortAnchor}
+            onClose={closeSort}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "center",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "center",
+            }}
           >
-            <Divider />
-            <ListItem
-              button
-              disabled={currentSorting === "OnlineFirst"}
-              onClick={() => setCurrentSorting("OnlineFirst")}
-            >
-              <ListItemIcon>
-                <FilterListIcon />
-              </ListItemIcon>
-              <ListItemText primary="Online (First)" />
-            </ListItem>
-            <Divider variant="inset" />
-            <ListItem
-              button
-              disabled={currentSorting === "OnlineLast"}
-              onClick={() => setCurrentSorting("OnlineLast")}
-            >
-              <ListItemIcon>
-                <FilterListIcon />
-              </ListItemIcon>
-              <ListItemText primary="Online (Last)" />
-            </ListItem>
-            <Divider variant="inset" />
-            <ListItem
-              button
-              disabled={currentSorting === "NameAZ"}
-              onClick={() => setCurrentSorting("NameAZ")}
-            >
-              <ListItemIcon>
-                <FilterListIcon />
-              </ListItemIcon>
-              <ListItemText primary="Name (A-Z)" />
-            </ListItem>
-            <Divider variant="inset" />
-            <ListItem
-              button
-              disabled={currentSorting === "NameZA"}
-              onClick={() => setCurrentSorting("NameZA")}
-            >
-              <ListItemIcon>
-                <FilterListIcon />
-              </ListItemIcon>
-              <ListItemText primary="Name (Z-A)" />
-            </ListItem>
-          </List>
+            <List className="FriendsListTab-List">
+              <ListItem
+                button
+                disabled={currentSorting === "OnlineFirst"}
+                onClick={() => setCurrentSorting("OnlineFirst")}
+              >
+                <ListItemIcon>
+                  <FilterListIcon />
+                </ListItemIcon>
+                <ListItemText primary="Online (First)" />
+              </ListItem>
+              <Divider variant="inset" />
+              <ListItem
+                button
+                disabled={currentSorting === "OnlineLast"}
+                onClick={() => setCurrentSorting("OnlineLast")}
+              >
+                <ListItemIcon>
+                  <FilterListIcon />
+                </ListItemIcon>
+                <ListItemText primary="Online (Last)" />
+              </ListItem>
+              <Divider variant="inset" />
+              <ListItem
+                button
+                disabled={currentSorting === "NameAZ"}
+                onClick={() => setCurrentSorting("NameAZ")}
+              >
+                <ListItemIcon>
+                  <FilterListIcon />
+                </ListItemIcon>
+                <ListItemText primary="Name (A-Z)" />
+              </ListItem>
+              <Divider variant="inset" />
+              <ListItem
+                button
+                disabled={currentSorting === "NameZA"}
+                onClick={() => setCurrentSorting("NameZA")}
+              >
+                <ListItemIcon>
+                  <FilterListIcon />
+                </ListItemIcon>
+                <ListItemText primary="Name (Z-A)" />
+              </ListItem>
+            </List>
+          </Popover>
+          <ListSubheader component="div">Friend Sorting</ListSubheader>
+          <Divider />
+          <Button
+            variant="contained"
+            onClick={openSort}
+            className="FriendsListTab-SortButton"
+          >
+            Set Sorting
+          </Button>
         </Paper>
         <Paper className="FriendsListTab-Actions" variant="outlined">
           <List

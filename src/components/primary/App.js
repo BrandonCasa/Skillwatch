@@ -402,7 +402,7 @@ function App(props) {
                   TitleInvisible: props.primaryDrawerOpen,
                 })}
               >
-                Skillwatch
+                Skillchat
               </Typography>
               <div
                 className={clsx("LoginVisible", {

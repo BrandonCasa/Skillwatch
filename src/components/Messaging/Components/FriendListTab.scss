@@ -23,6 +23,11 @@
       margin-left: 16px;
       padding: 8px;
 
+      .FriendsListTab-SortButton {
+        margin: 8px 16px;
+        width: calc(100% - 32px);
+      }
+
       .FriendsListTab-List {
         padding-top: 0px;
       }
