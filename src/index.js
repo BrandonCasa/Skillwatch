@@ -10,6 +10,7 @@ import store from "./rematch/store";
 import firebase from "firebase/app";
 import "firebase/auth";
 import firebaseConfig from "./firebase";
+
 firebase.initializeApp(firebaseConfig);
 
 ReactDOM.render(

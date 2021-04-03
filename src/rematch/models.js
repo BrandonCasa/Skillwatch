@@ -14,3 +14,21 @@ export const primaryDrawerOpen = {
     },
   },
 };
+
+const defaultUserInformation = {
+  loggedIn: false,
+};
+
+export const userInformation = {
+  state: defaultUserInformation, // initial state
+  reducers: {
+    // handle state changes with pure functions
+    setLoggedIn(state, payload) {
+      console.log(payload);
+      return {
+        ...state,
+        loggedIn: payload,
+      };
+    },
+  },
+};

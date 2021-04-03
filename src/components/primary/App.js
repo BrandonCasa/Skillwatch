@@ -67,7 +67,7 @@ function LoginRegisterBtn(props) {
     return firebase
       .auth()
       .signInWithPopup(provider)
-      .then(() => {
+      .then((result) => {
         setOpen(false);
       })
       .catch((error) => {
@@ -85,6 +85,7 @@ function LoginRegisterBtn(props) {
           .signInWithEmailAndPassword(email, pass)
           .then((userCredential) => {
             // var user = userCredential.user;
+            props.setLoggedIn(true);
             setOpen(false);
           })
           .catch((error) => {
@@ -300,8 +301,6 @@ function ProfMenu(props) {
 }
 
 function App(props) {
-  const [loggedIn, setLoggedIn] = React.useState(!!firebase.auth().currentUser);
-
   let user = firebase.auth().currentUser;
   let db = firebase.firestore();
   let defaultUser = {
@@ -420,8 +419,7 @@ function App(props) {
 
   React.useEffect(() => {
     firebase.auth().onAuthStateChanged((tempUser) => {
-      setLoggedIn(!!tempUser);
-
+      props.setLoggedIn(!!tempUser);
       if (tempUser) {
         user = tempUser;
         checkUserExists();
@@ -469,14 +467,14 @@ function App(props) {
               </Typography>
               <div
                 className={clsx("LoginVisible", {
-                  LoginInvisible: loggedIn,
+                  LoginInvisible: props.loggedIn,
                 })}
               >
                 <LoginRegisterBtn {...props} />
               </div>
               <div
                 className={clsx("LoginVisible", {
-                  LoginInvisible: !loggedIn,
+                  LoginInvisible: !props.loggedIn,
                 })}
               >
                 <ProfMenu {...props} />
@@ -485,13 +483,13 @@ function App(props) {
           </AppBar>
           <Switch>
             <Route path="/messaging">
-              <MessagingContainer checkUserExists={checkUserExists} loggedIn={loggedIn} user={user} database={db} />
+              <MessagingContainer checkUserExists={checkUserExists} user={user} database={db} />
             </Route>
             <Route path="/account/profile">
-              <ProfileContainer loggedIn={loggedIn} user={user} database={db} />
+              <ProfileContainer user={user} database={db} />
             </Route>
             <Route path="/">
-              <HomeContainer loggedIn={loggedIn} user={user} database={db} />
+              <HomeContainer user={user} database={db} />
             </Route>
           </Switch>
         </ThemeProvider>

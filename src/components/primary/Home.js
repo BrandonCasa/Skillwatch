@@ -23,8 +23,7 @@ function HomeLoggedIn(props) {
     <div>
       You are logged in!
       <br />
-      Please either go to Messaging or check out the in development Profile
-      page; accessable at the top right.
+      Please either go to Messaging or check out the in development Profile page; accessable at the top right.
     </div>
   );
 }
@@ -77,12 +76,7 @@ function Home(props) {
         </List>
         <Divider />
         <List>
-          <ListItem
-            button
-            key={"Profile"}
-            component={Link}
-            to="/account/profile"
-          >
+          <ListItem button key={"Profile"} component={Link} to="/account/profile">
             <ListItemIcon>
               <AccountCircleIcon />
             </ListItemIcon>
@@ -95,11 +89,7 @@ function Home(props) {
           ContentClosed: !props.primaryDrawerOpen,
         })}
       >
-        {props.loggedIn ? (
-          <HomeLoggedIn {...props} />
-        ) : (
-          <HomeNotLoggedIn {...props} />
-        )}
+        {props.loggedIn ? <HomeLoggedIn {...props} /> : <HomeNotLoggedIn {...props} />}
       </div>
     </div>
   );
