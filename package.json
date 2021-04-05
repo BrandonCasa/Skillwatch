@@ -1,6 +1,6 @@
 {
   "name": "skillwatch",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "private": true,
   "main": "public/electron.js",
   "homepage": "./",
@@ -52,7 +52,6 @@
     "directories": {
       "buildResources": "public"
     },
-    "releaseType": "release",
     "publish": [
       {
         "provider": "github",
@@ -75,7 +74,6 @@
       ]
     }
   },
-  "releaseType": "release",
   "eslintConfig": {
     "extends": [
       "react-app",
