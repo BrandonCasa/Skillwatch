@@ -441,18 +441,19 @@ function App(props) {
           setDownloadCurrent(data.transferred);
         } else if (data === "update-downloaded") {
           setDownloadComplete(true);
+        } else if (data === "update-not-available") {
+          firebase.auth().onAuthStateChanged((tempUser) => {
+            props.setLoggedIn(!!tempUser);
+            if (tempUser) {
+              user = tempUser;
+              checkUserExists();
+            } else {
+              user = undefined;
+            }
+          });
         }
       });
     }
-    firebase.auth().onAuthStateChanged((tempUser) => {
-      props.setLoggedIn(!!tempUser);
-      if (tempUser) {
-        user = tempUser;
-        checkUserExists();
-      } else {
-        user = undefined;
-      }
-    });
   }, []);
 
   return (
