@@ -307,7 +307,6 @@ function App(props) {
   const [updateDialog, setUpdateDialog] = React.useState(false);
   const [downloadComplete, setDownloadComplete] = React.useState(false);
   const [downloading, setDownloading] = React.useState(false);
-  const [updateNotAvailable, setUpdateNotAvailable] = React.useState(false);
   const [downloadProgress, setDownloadProgress] = React.useState(-100);
   const [downloadSpeed, setDownloadSpeed] = React.useState(-100);
   const [downloadTotal, setDownloadTotal] = React.useState(-100);
@@ -430,6 +429,7 @@ function App(props) {
   };
 
   React.useEffect(() => {
+    let updateNotAvailable = false;
     if (isElectron()) {
       window.api.receive("fromMain", (data) => {
         console.log(`Received ${data} from main process`);
@@ -440,14 +440,16 @@ function App(props) {
           setDownloadSpeed(data.speed);
           setDownloadTotal(data.total);
           setDownloadCurrent(data.transferred);
-        } else if (data === "update-downloaded") {
+        }
+        if (data === "update-downloaded") {
           setDownloadComplete(true);
-        } else if (data === "update-not-available") {
-          setUpdateNotAvailable(true);
+        }
+        if (data === "update-not-available") {
+          updateNotAvailable = true;
         }
       });
     } else {
-      setUpdateNotAvailable(true);
+      updateNotAvailable = true;
     }
     if (updateNotAvailable) {
       firebase.auth().onAuthStateChanged((tempUser) => {
