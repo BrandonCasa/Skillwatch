@@ -420,8 +420,8 @@ function App(props) {
 
   React.useEffect(() => {
     if (isElectron()) {
-      window.ipcRenderer.on("autoUpdaterLog", (event, arg) => {
-        console.log(arg);
+      window.api.receive("fromMain", (data) => {
+        console.log(`Received ${data} from main process`);
       });
     }
     firebase.auth().onAuthStateChanged((tempUser) => {

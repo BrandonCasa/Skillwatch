@@ -20,7 +20,7 @@ function createWindow() {
   });
 
   // and load the index.html of the app.
-  mainWindow.loadURL("https://skilltrackz.com/");
+  mainWindow.loadURL("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
 
   // Open the DevTools.
   if (isDev) {
@@ -38,7 +38,7 @@ function createWindow() {
 
 function sendStatusToWindow(text) {
   log.info(text);
-  ipcMain.send("autoUpdaterLog", text);
+  mainWindow.webContents.send("fromMain", text);
 }
 
 autoUpdater.on("checking-for-update", () => {
