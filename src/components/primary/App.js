@@ -470,12 +470,10 @@ function App(props) {
                     <Typography variant="caption" component="div" color="textSecondary">{`${Math.round(downloadProgress)}%`}</Typography>
                   </Box>
                 </Box>
-                <Typography variant="h3" component="h2">
-                  Downloaded {downloadCurrent} of {downloadTotal}.
+                <Typography variant="h5">
+                  Downloaded {downloadCurrent * 0.000001} / {downloadTotal * 0.000001} Megabytes.
                 </Typography>
-                <Typography variant="h5" component="h2">
-                  Download speed: {downloadSpeed}.
-                </Typography>
+                <Typography variant="h6">Download speed (MB/s): {downloadSpeed * 0.000001}.</Typography>
               </DialogContent>
             )}
             <DialogActions>
