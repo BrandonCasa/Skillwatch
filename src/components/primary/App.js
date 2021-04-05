@@ -478,22 +478,11 @@ function App(props) {
                   </Box>
                 </Box>
                 <Typography variant="h5">
-                  Downloaded{" "}
-                  {(downloadCurrent * 0.000001).toString().includes(".")
-                    ? ((downloadCurrent * 0.000001).toString() + "000000000000000").substring(1, 7)
-                    : ((downloadCurrent * 0.000001).toString() + ".00000000000000").substring(1, 7)}{" "}
-                  /{" "}
-                  {(downloadTotal * 0.000001).toString().includes(".")
-                    ? ((downloadTotal * 0.000001).toString() + "000000000000000").substring(1, 7)
-                    : ((downloadTotal * 0.000001).toString() + ".00000000000000").substring(1, 7)}{" "}
-                  Megabytes.
+                  Downloaded {(downloadCurrent * 0.000001).toString().includes(".") ? (downloadCurrent * 0.000001).toString().split(".")[0] : (downloadCurrent * 0.000001).toString()} /{" "}
+                  {(downloadTotal * 0.000001).toString().includes(".") ? (downloadTotal * 0.000001).toString().split(".")[0] : (downloadTotal * 0.000001).toString()} Megabytes.
                 </Typography>
                 <Typography variant="h6">
-                  Download speed (MB/s):{" "}
-                  {(downloadSpeed * 0.000001).toString().includes(".")
-                    ? ((downloadSpeed * 0.000001).toString() + "000000000000000").substring(1, 12)
-                    : ((downloadSpeed * 0.000001).toString() + ".00000000000000").substring(1, 12)}
-                  .
+                  Download speed (MB/s): {(downloadSpeed * 0.000001).toString().includes(".") ? (downloadSpeed * 0.000001).toString().split(".")[0] : (downloadSpeed * 0.000001).toString()}.
                 </Typography>
               </DialogContent>
             )}
