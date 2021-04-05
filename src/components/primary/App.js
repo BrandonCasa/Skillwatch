@@ -453,6 +453,16 @@ function App(props) {
           });
         }
       });
+    } else {
+      firebase.auth().onAuthStateChanged((tempUser) => {
+        props.setLoggedIn(!!tempUser);
+        if (tempUser) {
+          user = tempUser;
+          checkUserExists();
+        } else {
+          user = undefined;
+        }
+      });
     }
   }, []);
 
