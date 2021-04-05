@@ -26,6 +26,8 @@ import Avatar from "@material-ui/core/Avatar";
 import Badge from "@material-ui/core/Badge";
 import PersonIcon from "@material-ui/icons/Person";
 import isElectron from "is-electron";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Box from "@material-ui/core/Box";
 
 import firebase from "firebase/app";
 import "firebase/auth";
@@ -302,6 +304,14 @@ function ProfMenu(props) {
 }
 
 function App(props) {
+  const [updateDialog, setUpdateDialog] = React.useState(false);
+  const [updateCompleteDialog, setUpdateCompleteDialog] = React.useState(false);
+  const [downloading, setDownloading] = React.useState(false);
+  const [downloadProgress, setDownloadProgress] = React.useState(-100);
+  const [downloadSpeed, setDownloadSpeed] = React.useState(-100);
+  const [downloadTotal, setDownloadTotal] = React.useState(-100);
+  const [downloadCurrent, setDownloadCurrent] = React.useState(-100);
+
   let user = firebase.auth().currentUser;
   let db = firebase.firestore();
   let defaultUser = {
@@ -422,6 +432,18 @@ function App(props) {
     if (isElectron()) {
       window.api.receive("fromMain", (data) => {
         console.log(`Received ${data} from main process`);
+        if (data === "update-available") {
+          setUpdateDialog(true);
+          setDownloadProgress(0);
+        } else if (data.hadOwnProperty("downloadSpeed")) {
+          setDownloading(true);
+          setDownloadProgress(data.percent);
+          setDownloadSpeed(data.speed);
+          setDownloadTotal(data.total);
+          setDownloadCurrent(data.transferred);
+        } else if (data === "update-downloaded") {
+          console.log("Update Downloaded");
+        }
       });
     }
     firebase.auth().onAuthStateChanged((tempUser) => {
@@ -440,6 +462,33 @@ function App(props) {
       <div className="App">
         <ThemeProvider theme={theme}>
           <CssBaseline />
+          <Dialog open={updateDialog}>
+            <DialogTitle id="form-dialog-title">An Update is Available</DialogTitle>
+            {downloading && (
+              <DialogContent>
+                <Box position="relative" display="inline-flex">
+                  <CircularProgress variant="determinate" value={downloadProgress} />
+                  <Box top={0} left={0} bottom={0} right={0} position="absolute" display="flex" alignItems="center" justifyContent="center">
+                    <Typography variant="caption" component="div" color="textSecondary">{`${Math.round(downloadProgress)}%`}</Typography>
+                  </Box>
+                </Box>
+                <Typography variant="h3" component="h2">
+                  Downloaded {downloadCurrent} of {downloadTotal}.
+                </Typography>
+                <Typography variant="h5" component="h2">
+                  Download speed: {downloadSpeed}
+                </Typography>
+              </DialogContent>
+            )}
+            <DialogActions>
+              <Button color="primary" onClick={() => window.api.send("toMain", "close-app")}>
+                Close App
+              </Button>
+              <Button variant="contained" color="secondary" onClick={() => window.api.send("toMain", "start-download")}>
+                Download and Install
+              </Button>
+            </DialogActions>
+          </Dialog>
           <AppBar
             position="static"
             className={clsx("AppBar", {

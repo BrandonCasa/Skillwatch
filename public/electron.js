@@ -36,31 +36,38 @@ function createWindow() {
   }
 }
 
+ipcMain.on("toMain", (event, arg) => {
+  if (arg === "start-download") {
+    autoUpdater.downloadUpdate().then(() => {
+      autoUpdater.quitAndInstall(true, true);
+    });
+  } else if (arg === "close-app") {
+    mainWindow.close();
+  }
+});
+
 function sendStatusToWindow(text) {
   log.info(text);
   mainWindow.webContents.send("fromMain", text);
 }
 
 autoUpdater.on("checking-for-update", () => {
-  sendStatusToWindow("Checking for update...");
+  sendStatusToWindow("checking-for-update");
 });
 autoUpdater.on("update-available", (info) => {
-  sendStatusToWindow("Update available.");
+  sendStatusToWindow("update-available");
 });
 autoUpdater.on("update-not-available", (info) => {
-  sendStatusToWindow("Update not available.");
+  sendStatusToWindow("update-not-available");
 });
 autoUpdater.on("error", (err) => {
-  sendStatusToWindow("Error in auto-updater. " + err);
+  sendStatusToWindow("error");
 });
 autoUpdater.on("download-progress", (progressObj) => {
-  let log_message = "Download speed: " + progressObj.bytesPerSecond;
-  log_message = log_message + " - Downloaded " + progressObj.percent + "%";
-  log_message = log_message + " (" + progressObj.transferred + "/" + progressObj.total + ")";
-  sendStatusToWindow(log_message);
+  sendStatusToWindow({ speed: progressObj.bytesPerSecond, percent: progressObj.percent, transferred: progressObj.transferred, total: progressObj.total });
 });
 autoUpdater.on("update-downloaded", (info) => {
-  sendStatusToWindow("Update downloaded");
+  sendStatusToWindow("update-downloaded");
 });
 
 // This method will be called when Electron has finished
