@@ -20,7 +20,7 @@ function createWindow() {
   });
 
   // and load the index.html of the app.
-  mainWindow.loadURL("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+  mainWindow.loadURL("https://skilltrackz.com/");
 
   // Open the DevTools.
   if (isDev) {
