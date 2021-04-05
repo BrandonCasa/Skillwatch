@@ -424,9 +424,11 @@ function App(props) {
   };
 
   React.useEffect(() => {
-    ipcRenderer.on("autoUpdaterLog", (event, arg) => {
-      console.log(arg);
-    });
+    if (isElectron) {
+      ipcRenderer.on("autoUpdaterLog", (event, arg) => {
+        console.log(arg);
+      });
+    }
     firebase.auth().onAuthStateChanged((tempUser) => {
       props.setLoggedIn(!!tempUser);
       if (tempUser) {
