@@ -476,7 +476,7 @@ function App(props) {
                   Downloaded {downloadCurrent} of {downloadTotal}.
                 </Typography>
                 <Typography variant="h5" component="h2">
-                  Download speed: {downloadSpeed}
+                  Download speed: {downloadSpeed}.
                 </Typography>
               </DialogContent>
             )}
