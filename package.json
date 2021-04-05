@@ -1,6 +1,6 @@
 {
   "name": "skillwatch",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "main": "public/electron.js",
   "homepage": "./",
@@ -21,6 +21,7 @@
     "firebase": "^8.3.0",
     "firebase-admin": "^9.6.0",
     "firebase-functions": "^3.13.2",
+    "is-electron": "^2.2.0",
     "node-sass": "4.14.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",

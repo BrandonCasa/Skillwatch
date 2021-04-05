@@ -1,35 +1,66 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow } = require("electron");
-const path = require("path");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const { autoUpdater } = require("electron-updater");
 const isDev = require("electron-is-dev");
 
+let mainWindow;
+let log;
+
 function createWindow() {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
       nativeWindowOpen: true,
+      enableRemoteModule: true,
+      nodeIntegration: true,
     },
   });
 
   // and load the index.html of the app.
-  mainWindow.loadURL("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+  mainWindow.loadURL("https://skilltrackz.com/");
 
   // Open the DevTools.
   if (isDev) {
     mainWindow.webContents.openDevTools();
-    const log = require("electron-log");
+    log = require("electron-log");
     log.transports.file.level = "debug";
     autoUpdater.logger = log;
   } else {
-    const log = require("electron-log");
+    log = require("electron-log");
     log.transports.file.level = "error";
     autoUpdater.logger = log;
     autoUpdater.checkForUpdatesAndNotify();
   }
 }
+
+function sendStatusToWindow(text) {
+  log.info(text);
+  ipcMain.send("autoUpdaterLog", text);
+}
+
+autoUpdater.on("checking-for-update", () => {
+  sendStatusToWindow("Checking for update...");
+});
+autoUpdater.on("update-available", (info) => {
+  sendStatusToWindow("Update available.");
+});
+autoUpdater.on("update-not-available", (info) => {
+  sendStatusToWindow("Update not available.");
+});
+autoUpdater.on("error", (err) => {
+  sendStatusToWindow("Error in auto-updater. " + err);
+});
+autoUpdater.on("download-progress", (progressObj) => {
+  let log_message = "Download speed: " + progressObj.bytesPerSecond;
+  log_message = log_message + " - Downloaded " + progressObj.percent + "%";
+  log_message = log_message + " (" + progressObj.transferred + "/" + progressObj.total + ")";
+  sendStatusToWindow(log_message);
+});
+autoUpdater.on("update-downloaded", (info) => {
+  sendStatusToWindow("Update downloaded");
+});
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

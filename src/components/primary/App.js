@@ -25,6 +25,7 @@ import Popover from "@material-ui/core/Popover";
 import Avatar from "@material-ui/core/Avatar";
 import Badge from "@material-ui/core/Badge";
 import PersonIcon from "@material-ui/icons/Person";
+import isElectron from "is-electron";
 
 import firebase from "firebase/app";
 import "firebase/auth";
@@ -37,6 +38,8 @@ import "./App.scss";
 import HomeContainer from "../../containers/HomeContainer";
 import ProfileContainer from "../../containers/ProfileContainer";
 import MessagingContainer from "../../containers/MessagingContainer";
+
+const { ipcRenderer } = window.require("electron");
 
 const theme = createMuiTheme({
   palette: {
@@ -418,6 +421,9 @@ function App(props) {
   };
 
   React.useEffect(() => {
+    ipcRenderer.on("autoUpdaterLog", (event, arg) => {
+      console.log(arg);
+    });
     firebase.auth().onAuthStateChanged((tempUser) => {
       props.setLoggedIn(!!tempUser);
       if (tempUser) {
