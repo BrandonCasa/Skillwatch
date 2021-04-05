@@ -37,10 +37,8 @@ function createWindow() {
 }
 
 ipcMain.on("toMain", (event, arg) => {
-  if (arg === "start-download") {
-    autoUpdater.downloadUpdate().then(() => {
-      autoUpdater.quitAndInstall(true, true);
-    });
+  if (arg === "start-install") {
+    autoUpdater.quitAndInstall(true, true);
   } else if (arg === "close-app") {
     mainWindow.close();
   }

@@ -305,7 +305,7 @@ function ProfMenu(props) {
 
 function App(props) {
   const [updateDialog, setUpdateDialog] = React.useState(false);
-  const [updateCompleteDialog, setUpdateCompleteDialog] = React.useState(false);
+  const [downloadComplete, setDownloadComplete] = React.useState(false);
   const [downloading, setDownloading] = React.useState(false);
   const [downloadProgress, setDownloadProgress] = React.useState(-100);
   const [downloadSpeed, setDownloadSpeed] = React.useState(-100);
@@ -432,17 +432,15 @@ function App(props) {
     if (isElectron()) {
       window.api.receive("fromMain", (data) => {
         console.log(`Received ${data} from main process`);
-        if (data === "update-available") {
+        if (data.hasOwnProperty("downloadSpeed")) {
           setUpdateDialog(true);
-          setDownloadProgress(0);
-        } else if (data.hadOwnProperty("downloadSpeed")) {
           setDownloading(true);
           setDownloadProgress(data.percent);
           setDownloadSpeed(data.speed);
           setDownloadTotal(data.total);
           setDownloadCurrent(data.transferred);
         } else if (data === "update-downloaded") {
-          console.log("Update Downloaded");
+          setDownloadComplete(true);
         }
       });
     }
@@ -463,7 +461,7 @@ function App(props) {
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Dialog open={updateDialog}>
-            <DialogTitle id="form-dialog-title">An Update is Available</DialogTitle>
+            <DialogTitle id="form-dialog-title">An Update is Downloading</DialogTitle>
             {downloading && (
               <DialogContent>
                 <Box position="relative" display="inline-flex">
@@ -481,11 +479,11 @@ function App(props) {
               </DialogContent>
             )}
             <DialogActions>
-              <Button color="primary" onClick={() => window.api.send("toMain", "close-app")}>
-                Close App
+              <Button color="primary" onClick={() => window.api.send("toMain", "close-app")} disabled={!downloadComplete}>
+                Close and Cancel
               </Button>
-              <Button variant="contained" color="secondary" onClick={() => window.api.send("toMain", "start-download")}>
-                Download and Install
+              <Button variant="contained" color="secondary" onClick={() => window.api.send("toMain", "start-install")} disabled={!downloadComplete}>
+                Close and Install
               </Button>
             </DialogActions>
           </Dialog>
