@@ -307,6 +307,7 @@ function App(props) {
   const [updateDialog, setUpdateDialog] = React.useState(false);
   const [downloadComplete, setDownloadComplete] = React.useState(false);
   const [downloading, setDownloading] = React.useState(false);
+  const [updateNotAvailable, setUpdateNotAvailable] = React.useState(false);
   const [downloadProgress, setDownloadProgress] = React.useState(-100);
   const [downloadSpeed, setDownloadSpeed] = React.useState(-100);
   const [downloadTotal, setDownloadTotal] = React.useState(-100);
@@ -442,18 +443,13 @@ function App(props) {
         } else if (data === "update-downloaded") {
           setDownloadComplete(true);
         } else if (data === "update-not-available") {
-          firebase.auth().onAuthStateChanged((tempUser) => {
-            props.setLoggedIn(!!tempUser);
-            if (tempUser) {
-              user = tempUser;
-              checkUserExists();
-            } else {
-              user = undefined;
-            }
-          });
+          setUpdateNotAvailable(true);
         }
       });
     } else {
+      setUpdateNotAvailable(true);
+    }
+    if (updateNotAvailable) {
       firebase.auth().onAuthStateChanged((tempUser) => {
         props.setLoggedIn(!!tempUser);
         if (tempUser) {
