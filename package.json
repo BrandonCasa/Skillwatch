@@ -1,6 +1,6 @@
 {
   "name": "skillwatch",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "main": "public/electron.js",
   "homepage": "./",
@@ -52,11 +52,13 @@
     "directories": {
       "buildResources": "public"
     },
+    "releaseType": "release",
     "publish": [
       {
         "provider": "github",
         "owner": "GummyEater",
-        "repo": "Skillwatch"
+        "repo": "Skillwatch",
+        "releaseType": "release"
       }
     ],
     "win": {
@@ -67,13 +69,13 @@
         {
           "target": "nsis",
           "arch": [
-            "x64",
-            "ia32"
+            "x64"
           ]
         }
       ]
     }
   },
+  "releaseType": "release",
   "eslintConfig": {
     "extends": [
       "react-app",
