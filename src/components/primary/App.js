@@ -419,7 +419,7 @@ function App(props) {
   };
 
   React.useEffect(() => {
-    if (isElectron) {
+    if (isElectron()) {
       window.ipcRenderer.on("autoUpdaterLog", (event, arg) => {
         console.log(arg);
       });
