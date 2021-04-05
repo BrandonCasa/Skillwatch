@@ -15,6 +15,7 @@ function createWindow() {
       nativeWindowOpen: true,
       enableRemoteModule: true,
       nodeIntegration: true,
+      preload: __dirname + "/preload.js",
     },
   });
 

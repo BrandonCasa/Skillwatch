@@ -39,11 +39,6 @@ import HomeContainer from "../../containers/HomeContainer";
 import ProfileContainer from "../../containers/ProfileContainer";
 import MessagingContainer from "../../containers/MessagingContainer";
 
-let ipcRenderer;
-if (isElectron) {
-  ipcRenderer = window.require("electron").ipcRenderer;
-}
-
 const theme = createMuiTheme({
   palette: {
     type: "dark",
@@ -425,7 +420,7 @@ function App(props) {
 
   React.useEffect(() => {
     if (isElectron) {
-      ipcRenderer.on("autoUpdaterLog", (event, arg) => {
+      window.ipcRenderer.on("autoUpdaterLog", (event, arg) => {
         console.log(arg);
       });
     }
