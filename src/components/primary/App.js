@@ -432,7 +432,7 @@ function App(props) {
     if (isElectron()) {
       window.api.receive("fromMain", (data) => {
         console.log(`Received ${data} from main process`);
-        if (data.hasOwnProperty("downloadSpeed")) {
+        if (data.hasOwnProperty("speed")) {
           setUpdateDialog(true);
           setDownloading(true);
           setDownloadProgress(data.percent);
