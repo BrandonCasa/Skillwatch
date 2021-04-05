@@ -39,7 +39,10 @@ import HomeContainer from "../../containers/HomeContainer";
 import ProfileContainer from "../../containers/ProfileContainer";
 import MessagingContainer from "../../containers/MessagingContainer";
 
-const { ipcRenderer } = window.require("electron");
+let ipcRenderer;
+if (isElectron) {
+  ipcRenderer = window.require("electron").ipcRenderer;
+}
 
 const theme = createMuiTheme({
   palette: {
