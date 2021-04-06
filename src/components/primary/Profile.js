@@ -28,8 +28,6 @@ import TextField from "@material-ui/core/TextField";
 import SaveIcon from "@material-ui/icons/Save";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
-import Snackbar from "@material-ui/core/Snackbar";
-import CloseIcon from "@material-ui/icons/Close";
 
 import { Link } from "react-router-dom";
 import "./Profile.scss";
@@ -41,149 +39,39 @@ function ProfileLoggedIn(props) {
   };
 
   const [avatarHovered, setAvatarHovered] = React.useState(false);
-  const [pfpBlob, setPfpBlob] = React.useState("");
-  const [username, setUsername] = React.useState("");
-  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
-  const [snackbarText, setSnackbarText] = React.useState("");
 
   const selectProfilePicture = (event) => {
     document.getElementById("pfpSelector").click();
   };
-  const closeSnackbar = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setSnackbarOpen(false);
-  };
   const pfpChanged = (event) => {
-    passedProps.db
-      .collection("users")
-      .doc(passedProps.user.uid)
-      .get()
-      .then((docSnapshot) => {
-        if (docSnapshot.exists) {
-          let file = event.target.files[0];
-          let reader = new FileReader();
-          reader.readAsDataURL(file);
+    let file = event.target.files[0];
+    let reader = new FileReader();
+    reader.readAsDataURL(file);
 
-          reader.onload = (readerEvent) => {
-            let content = readerEvent.target.result;
-            passedProps.db
-              .collection("users")
-              .doc(passedProps.user.uid)
-              .update({
-                pfp: content,
-              })
-              .then(() => {
-                console.log(`Successfully updated profile picture.`);
-              })
-              .catch((error) => {
-                console.error("Error updating profile picture", error);
-              });
-          };
-        } else {
-        }
-      });
+    reader.onload = (readerEvent) => {
+      let content = readerEvent.target.result;
+      props.setProfilePicture(content, props.user, props.database);
+    };
   };
 
   const submitNewInfo = (event) => {
     event.preventDefault();
-    props.database
-      .collection("users")
-      .doc(props.user.uid)
-      .get()
-      .then((snapshot) => {
-        if (snapshot.exists) {
-          let oldUsername = snapshot.data().username;
-          props.database
-            .collection("users")
-            .doc("FriendStore")
-            .get()
-            .then((friendStoreSnap) => {
-              if (!friendStoreSnap.data().usernames.hasOwnProperty(document.getElementById("usernameInput").value)) {
-                props.database
-                  .collection("users")
-                  .doc(props.user.uid)
-                  .update({
-                    username: document.getElementById("usernameInput").value,
-                  })
-                  .then(() => {
-                    let usernames = friendStoreSnap.data().usernames;
-                    delete usernames[oldUsername];
-
-                    usernames[document.getElementById("usernameInput").value] = props.user.uid;
-
-                    props.database.collection("users").doc("FriendStore").update({
-                      usernames: usernames,
-                    });
-                    console.log(`Successfully updated username.`);
-                  })
-                  .catch((error) => {
-                    console.error("Error updating username", error);
-                  });
-              } else {
-                setSnackbarText("Username already taken.");
-                setSnackbarOpen(true);
-                document.getElementById("usernameInput").value = oldUsername;
-              }
-            });
-        }
-      });
-
-    props.database
-      .collection("users")
-      .doc(props.user.uid)
-      .update({
-        bio: document.getElementById("bioInput").value,
-      });
+    if (document.getElementById("usernameInput").value.replaceAll(" ", "") !== "") {
+      props.setUsername(document.getElementById("usernameInput").value, props.user, props.database);
+    }
   };
 
   React.useEffect(() => {
-    passedProps.db
-      .collection("users")
-      .doc(passedProps.user.uid)
-      .onSnapshot((snapshot) => {
-        setPfpBlob(snapshot.data().pfp);
-      });
-    passedProps.db
-      .collection("users")
-      .doc(passedProps.user.uid)
-      .get()
-      .then((snapshot) => {
-        if (snapshot.exists && snapshot.data().username === passedProps.user.uid) {
-          document.getElementById("usernameInput").value = "";
-          document.getElementById("bioInput").value = "";
-        } else if (snapshot.exists && snapshot.data().username !== passedProps.user.uid) {
-          document.getElementById("usernameInput").value = snapshot.data().username;
-          document.getElementById("bioInput").value = snapshot.data().bio;
-        } else {
-          document.getElementById("usernameInput").value = "";
-          document.getElementById("bioInput").value = "";
-        }
-      });
+    props.awaitProfileChanges(props.user, props.database, (updateSnapshot) => {
+      document.getElementById("usernameInput").value = updateSnapshot.data().username;
+      document.getElementById("bioInput").value = updateSnapshot.data().bio;
+    });
   }, []);
 
   return (
     <div className="ProfileInner">
       <div className="Top">
         <Paper className="PaperTopLeft">
-          <Snackbar
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "left",
-            }}
-            open={snackbarOpen}
-            autoHideDuration={3000}
-            onClose={closeSnackbar}
-            message={snackbarText}
-            action={
-              <>
-                <IconButton size="small" aria-label="close" color="inherit" onClick={closeSnackbar}>
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              </>
-            }
-          />
           <ListSubheader component="div" className="ListSubheader">
             Public Account
             <Divider component="li" />
@@ -197,7 +85,7 @@ function ProfileLoggedIn(props) {
                       width: "60px",
                       height: "60px",
                     }}
-                    src={pfpBlob}
+                    src={props.profilePicture}
                   >
                     <PersonIcon
                       className={clsx("PersonIcon", {

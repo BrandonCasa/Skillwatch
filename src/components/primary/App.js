@@ -28,6 +28,8 @@ import PersonIcon from "@material-ui/icons/Person";
 import isElectron from "is-electron";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Box from "@material-ui/core/Box";
+import Snackbar from "@material-ui/core/Snackbar";
+import CloseIcon from "@material-ui/icons/Close";
 
 import firebase from "firebase/app";
 import "firebase/auth";
@@ -429,7 +431,6 @@ function App(props) {
   };
 
   React.useEffect(() => {
-    let updateNotAvailable = false;
     if (isElectron()) {
       window.api.receive("fromMain", (data) => {
         console.log(`Received ${data} from main process`);
@@ -444,24 +445,17 @@ function App(props) {
         if (data === "update-downloaded") {
           setDownloadComplete(true);
         }
-        if (data === "update-not-available") {
-          updateNotAvailable = true;
-        }
-      });
-    } else {
-      updateNotAvailable = true;
-    }
-    if (updateNotAvailable) {
-      firebase.auth().onAuthStateChanged((tempUser) => {
-        props.setLoggedIn(!!tempUser);
-        if (tempUser) {
-          user = tempUser;
-          checkUserExists();
-        } else {
-          user = undefined;
-        }
       });
     }
+    firebase.auth().onAuthStateChanged((tempUser) => {
+      props.setLoggedIn(!!tempUser);
+      if (tempUser) {
+        user = tempUser;
+        checkUserExists();
+      } else {
+        user = undefined;
+      }
+    });
   }, []);
 
   return (
@@ -473,19 +467,15 @@ function App(props) {
             <DialogTitle id="form-dialog-title">An Update is Downloading</DialogTitle>
             {downloading && (
               <DialogContent>
+                <Typography variant="h5">
+                  Download speed (MB/s): {(downloadSpeed * 0.000001).toString().includes(".") ? (downloadSpeed * 0.000001).toString().split(".")[0] : (downloadSpeed * 0.000001).toString()}.
+                </Typography>
                 <Box position="relative" display="inline-flex">
                   <CircularProgress variant="determinate" value={downloadProgress} />
                   <Box top={0} left={0} bottom={0} right={0} position="absolute" display="flex" alignItems="center" justifyContent="center">
                     <Typography variant="caption" component="div" color="textSecondary">{`${Math.round(downloadProgress)}%`}</Typography>
                   </Box>
                 </Box>
-                <Typography variant="h5">
-                  Downloaded {(downloadCurrent * 0.000001).toString().includes(".") ? (downloadCurrent * 0.000001).toString().split(".")[0] : (downloadCurrent * 0.000001).toString()} /{" "}
-                  {(downloadTotal * 0.000001).toString().includes(".") ? (downloadTotal * 0.000001).toString().split(".")[0] : (downloadTotal * 0.000001).toString()} Megabytes.
-                </Typography>
-                <Typography variant="h6">
-                  Download speed (MB/s): {(downloadSpeed * 0.000001).toString().includes(".") ? (downloadSpeed * 0.000001).toString().split(".")[0] : (downloadSpeed * 0.000001).toString()}.
-                </Typography>
               </DialogContent>
             )}
             <DialogActions>
@@ -497,6 +487,23 @@ function App(props) {
               </Button>
             </DialogActions>
           </Dialog>
+          <Snackbar
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+            open={props.snackbarOpen}
+            autoHideDuration={3000}
+            onClose={props.setSnackbarClosed}
+            message={props.snackbarText}
+            action={
+              <>
+                <IconButton size="small" aria-label="close" color="inherit" onClick={props.setSnackbarClosed}>
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </>
+            }
+          />
           <AppBar
             position="static"
             className={clsx("AppBar", {
