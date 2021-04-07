@@ -15,6 +15,9 @@ const mapDispatch = (dispatch) => ({
   setLoggedIn: (newLoggedIn) => dispatch.userInformation.setLoggedIn(newLoggedIn),
   awaitProfileChanges: (user, database) => dispatch.myProfile.awaitProfileChanges({ user, database }),
   setStatus: (newStatus, user, database) => dispatch.myProfile.setStatus({ newStatus, user, database }),
+  setSnackbarOpen: () => dispatch.snackbar.setSnackbarOpen(),
+  setSnackbarClosed: () => dispatch.snackbar.setSnackbarClosed(),
+  setSnackbarText: (newText) => dispatch.snackbar.setSnackbarText(newText),
 });
 
 const AppContainer = connect(mapState, mapDispatch)(App);
