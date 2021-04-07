@@ -36,7 +36,7 @@ import "firebase/auth";
 import "firebase/messaging";
 import "firebase/firestore";
 
-import { BrowserRouter as Router, Switch, Route, useHistory } from "react-router-dom";
+import { HashRouter as Router, Switch, Route, useHistory } from "react-router-dom";
 import "./App.scss";
 
 import HomeContainer from "../../containers/HomeContainer";
