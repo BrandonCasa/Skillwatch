@@ -11,6 +11,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    frame: false,
     webPreferences: {
       nativeWindowOpen: true,
       enableRemoteModule: true,
@@ -38,9 +39,16 @@ function createWindow() {
 
 ipcMain.on("toMain", (event, arg) => {
   if (arg === "start-install") {
-    autoUpdater.quitAndInstall(true, true);
+    autoUpdater.quitAndInstall();
+    setTimeout(() => {
+      app.exit(0);
+    }, 2000);
   } else if (arg === "close-app") {
-    mainWindow.close();
+    app.exit(0);
+  } else if (arg === "minimize-app") {
+    mainWindow.minimize();
+  } else if (arg === "maximize-app") {
+    mainWindow.maximize();
   }
 });
 

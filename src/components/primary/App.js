@@ -30,6 +30,8 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import Box from "@material-ui/core/Box";
 import Snackbar from "@material-ui/core/Snackbar";
 import CloseIcon from "@material-ui/icons/Close";
+import MinimizeIcon from "@material-ui/icons/Minimize";
+import MaximizeIcon from "@material-ui/icons/Maximize";
 
 import firebase from "firebase/app";
 import "firebase/auth";
@@ -238,6 +240,20 @@ function ProfMenu(props) {
         <IconButton className="App-SettingsButton" onClick={handleMenu} color="inherit">
           <SettingsIcon />
         </IconButton>
+        <div className="SpacerA" />
+        {isElectron() && (
+          <>
+            <IconButton className="App-WindowButton" onClick={() => window.api.send("toMain", "minimize-app")} color="inherit">
+              <MinimizeIcon />
+            </IconButton>
+            <IconButton className="App-WindowButton" onClick={() => window.api.send("toMain", "maximize-app")} color="inherit">
+              <MaximizeIcon />
+            </IconButton>
+            <IconButton className="App-WindowButton" onClick={() => window.api.send("toMain", "close-app")} color="inherit">
+              <CloseIcon />
+            </IconButton>
+          </>
+        )}
       </Paper>
       <Popover
         id="menu-appbar"
@@ -501,6 +517,7 @@ function App(props) {
             })}
           >
             <Toolbar
+              style={{ WebkitAppRegion: "drag" }}
               className={clsx("Toolbar", {
                 ToolbarShift: props.primaryDrawerOpen,
               })}
@@ -526,6 +543,7 @@ function App(props) {
                 Skillchat
               </Typography>
               <div
+                style={{ WebkitAppRegion: "no-drag" }}
                 className={clsx("LoginVisible", {
                   LoginInvisible: props.loggedIn,
                 })}
@@ -533,11 +551,12 @@ function App(props) {
                 <LoginRegisterBtn {...props} />
               </div>
               <div
+                style={{ WebkitAppRegion: "no-drag" }}
                 className={clsx("LoginVisible", {
                   LoginInvisible: !props.loggedIn,
                 })}
               >
-                <ProfMenu {...props} />
+                <ProfMenu style={{ WebkitAppRegion: "no-drag" }} {...props} />
               </div>
             </Toolbar>
           </AppBar>
