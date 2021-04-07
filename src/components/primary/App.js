@@ -219,42 +219,49 @@ function ProfMenu(props) {
 
   return (
     <div>
-      <Paper className="App-UserSettings">
-        <IconButton className="App-Avatar" color="inherit" onClick={handleStatusMenu}>
-          <Badge
-            className={`Badge Badge-${props.status}`}
-            variant="dot"
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "right",
-            }}
-          >
-            <div>
-              <Avatar src={props.profilePicture} className="App-AvatarIcon">
-                <PersonIcon className="PersonIcon" />
-              </Avatar>
-            </div>
-          </Badge>
-        </IconButton>
-        <div className="SpacerA" />
-        <IconButton className="App-SettingsButton" onClick={handleMenu} color="inherit">
-          <SettingsIcon />
-        </IconButton>
-        <div className="SpacerA" />
+      <div className="App-TopRight">
+        <Paper className="App-UserSettings">
+          <IconButton className="App-Avatar" color="inherit" onClick={handleStatusMenu}>
+            <Badge
+              className={`Badge Badge-${props.status}`}
+              variant="dot"
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+              }}
+            >
+              <div>
+                <Avatar src={props.profilePicture} className="App-AvatarIcon">
+                  <PersonIcon className="PersonIcon" />
+                </Avatar>
+              </div>
+            </Badge>
+          </IconButton>
+          <div className="SpacerA" />
+          <IconButton className="App-SettingsButton" onClick={handleMenu} color="inherit">
+            <SettingsIcon />
+          </IconButton>
+        </Paper>
         {isElectron() && (
           <>
-            <IconButton className="App-WindowButton" onClick={() => window.api.send("toMain", "minimize-app")} color="inherit">
-              <MinimizeIcon />
-            </IconButton>
-            <IconButton className="App-WindowButton" onClick={() => window.api.send("toMain", "maximize-app")} color="inherit">
-              <MaximizeIcon />
-            </IconButton>
-            <IconButton className="App-WindowButton" onClick={() => window.api.send("toMain", "close-app")} color="inherit">
-              <CloseIcon />
-            </IconButton>
+            <Paper className="App-Paper">
+              <IconButton className="App-WindowButton" onClick={() => window.api.send("toMain", "minimize-app")} color="inherit">
+                <MinimizeIcon />
+              </IconButton>
+            </Paper>
+            <Paper className="App-Paper">
+              <IconButton className="App-WindowButton" onClick={() => window.api.send("toMain", "maximize-app")} color="inherit">
+                <MaximizeIcon />
+              </IconButton>
+            </Paper>
+            <Paper className="App-Paper">
+              <IconButton className="App-WindowButton" onClick={() => window.api.send("toMain", "close-app")} color="inherit">
+                <CloseIcon />
+              </IconButton>
+            </Paper>
           </>
         )}
-      </Paper>
+      </div>
       <Popover
         id="menu-appbar"
         open={statusMenuOpen}

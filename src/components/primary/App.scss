@@ -29,57 +29,67 @@
   .LoginVisible {
     display: inherit;
 
-    .App-UserSettings {
-      width: 300px;
+    .App-TopRight {
       display: flex;
-      flex-direction: row;
 
-      .App-SettingsButton {
-        padding: 6px;
-        width: 48px;
-        height: 48px;
-      }
-      .App-WindowButton {
-        background: #3f51b5;
-        margin: 6px;
-        padding: 6px;
+      .App-Paper {
+        border-radius: 50%;
         width: 36px;
         height: 36px;
+        margin: 6px;
+
+        .App-WindowButton {
+          padding: 6px;
+          width: 36px;
+          height: 36px;
+        }
       }
+      .App-UserSettings {
+        width: 300px;
+        display: flex;
+        flex-direction: row;
 
-      .SpacerA {
-        flex-grow: 1;
-      }
-
-      .App-Avatar {
-        padding: 8px;
-
-        .App-AvatarIcon {
-          padding: 0px;
-          width: 32px;
-          height: 32px;
+        .App-SettingsButton {
+          padding: 6px;
+          width: 48px;
+          height: 48px;
         }
 
-        .Badge span {
-          transform: translate(0, 0);
-          height: 10px;
-          width: 10px;
-          border-radius: 5px;
+        .SpacerA {
+          -webkit-app-region: drag;
+          flex-grow: 1;
         }
-        .Badge-Online span {
-          background-color: rgb(67, 181, 129);
-        }
-        .Badge-Offline span {
-          background-color: rgb(150, 150, 150);
-        }
-        .Badge-Away span {
-          background-color: rgb(250, 166, 26);
-        }
-        .Badge-DnD span {
-          background-color: rgb(240, 71, 71);
-        }
-        .Badge-Error span {
-          background-color: rgb(255, 0, 0);
+
+        .App-Avatar {
+          padding: 8px;
+
+          .App-AvatarIcon {
+            padding: 0px;
+            width: 32px;
+            height: 32px;
+          }
+
+          .Badge span {
+            transform: translate(0, 0);
+            height: 10px;
+            width: 10px;
+            border-radius: 5px;
+          }
+          .Badge-Online span {
+            background-color: rgb(67, 181, 129);
+          }
+          .Badge-Offline span {
+            background-color: rgb(150, 150, 150);
+          }
+          .Badge-Away span {
+            background-color: rgb(250, 166, 26);
+          }
+          .Badge-DnD span {
+            background-color: rgb(240, 71, 71);
+          }
+          .Badge-Error span {
+            background-color: rgb(255, 0, 0);
+          }
         }
       }
     }
