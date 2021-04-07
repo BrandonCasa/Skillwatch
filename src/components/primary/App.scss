@@ -33,6 +33,9 @@
       flex-direction: row;
 
       .App-SettingsButton {
+        padding: 6px;
+        width: 48px;
+        height: 48px;
       }
 
       .SpacerA {
@@ -40,13 +43,19 @@
       }
 
       .App-Avatar {
-        padding: 4px;
+        padding: 8px;
+
+        .App-AvatarIcon {
+          padding: 0px;
+          width: 32px;
+          height: 32px;
+        }
 
         .Badge span {
-          transform: translate(-2px, -2px);
-          height: 12px;
-          width: 12px;
-          border-radius: 6px;
+          transform: translate(0, 0);
+          height: 10px;
+          width: 10px;
+          border-radius: 5px;
         }
         .Badge-Online span {
           background-color: rgb(67, 181, 129);

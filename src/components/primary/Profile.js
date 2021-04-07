@@ -56,17 +56,29 @@ function ProfileLoggedIn(props) {
 
   const submitNewInfo = (event) => {
     event.preventDefault();
+
     if (document.getElementById("usernameInput").value.replaceAll(" ", "") !== "") {
       props.setUsername(document.getElementById("usernameInput").value, props.user, props.database);
     }
+    if (document.getElementById("bioInput").value.replaceAll(" ", "") !== "") {
+      props.setBio(document.getElementById("bioInput").value, props.user, props.database);
+    }
+    props.setSnackbarOpen(false);
+    props.setSnackbarOpen(true);
+    props.setSnackbarText("Updated user information.");
   };
 
   React.useEffect(() => {
-    props.awaitProfileChanges(props.user, props.database, (updateSnapshot) => {
-      document.getElementById("usernameInput").value = updateSnapshot.data().username;
-      document.getElementById("bioInput").value = updateSnapshot.data().bio;
-    });
-  }, []);
+    if (props.username !== "") {
+      document.getElementById("usernameInput").value = props.username;
+    }
+  }, [props.username]);
+
+  React.useEffect(() => {
+    if (props.bio !== "") {
+      document.getElementById("bioInput").value = props.bio;
+    }
+  }, [props.bio]);
 
   return (
     <div className="ProfileInner">
@@ -80,6 +92,13 @@ function ProfileLoggedIn(props) {
             <IconButton className="AvatarButton" onMouseEnter={() => setAvatarHovered(true)} onMouseLeave={() => setAvatarHovered(false)} onClick={selectProfilePicture}>
               <Badge badgeContent={<AddPhotoAlternateIcon className="EditIcon" />} color="secondary">
                 <div className="Icons">
+                  <Typography
+                    className={clsx("TextOverlay", {
+                      TextOverlayVisible: avatarHovered,
+                    })}
+                  >
+                    Change
+                  </Typography>
                   <Avatar
                     style={{
                       width: "60px",
@@ -92,13 +111,6 @@ function ProfileLoggedIn(props) {
                         PersonIconHovered: avatarHovered,
                       })}
                     />
-                    <Typography
-                      className={clsx("TextOverlay", {
-                        TextOverlayVisible: avatarHovered,
-                      })}
-                    >
-                      Change
-                    </Typography>
                   </Avatar>
                 </div>
               </Badge>

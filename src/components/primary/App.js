@@ -160,8 +160,6 @@ function ProfMenu(props) {
   const statusMenuOpen = Boolean(statusMenuAnchorEl);
   const [toProfileAllowed, setToProfileAllowed] = React.useState(!(history.location.pathname === "/account/profile"));
   const profBtnOpen = Boolean(profBtnAnchorEl);
-  const [pfpBlob, setPfpBlob] = React.useState("");
-  const [status, setStatus] = React.useState(false);
 
   let db = firebase.firestore();
   let user = firebase.auth().currentUser;
@@ -184,24 +182,16 @@ function ProfMenu(props) {
     firebase.auth().signOut();
   };
   const setOnline = () => {
-    db.collection("users").doc(user.uid).update({
-      status: "Online",
-    });
+    props.setStatus("Online", user, db);
   };
   const setOffline = () => {
-    db.collection("users").doc(user.uid).update({
-      status: "Offline",
-    });
+    props.setStatus("Offline", user, db);
   };
   const setAway = () => {
-    db.collection("users").doc(user.uid).update({
-      status: "Away",
-    });
+    props.setStatus("Away", user, db);
   };
   const setDnD = () => {
-    db.collection("users").doc(user.uid).update({
-      status: "DnD",
-    });
+    props.setStatus("DnD", user, db);
   };
 
   const handleStatusMenu = (event) => {
@@ -212,12 +202,6 @@ function ProfMenu(props) {
     firebase.auth().onAuthStateChanged((tempUser) => {
       if (tempUser) {
         user = tempUser;
-        db.collection("users")
-          .doc(user.uid)
-          .onSnapshot((snapshot) => {
-            setPfpBlob(snapshot.data().pfp);
-            setStatus(snapshot.data().status);
-          });
       } else {
         user = undefined;
       }
@@ -236,7 +220,7 @@ function ProfMenu(props) {
       <Paper className="App-UserSettings">
         <IconButton className="App-Avatar" color="inherit" onClick={handleStatusMenu}>
           <Badge
-            className={`Badge Badge-${status}`}
+            className={`Badge Badge-${props.status}`}
             variant="dot"
             anchorOrigin={{
               vertical: "bottom",
@@ -244,7 +228,7 @@ function ProfMenu(props) {
             }}
           >
             <div>
-              <Avatar src={pfpBlob}>
+              <Avatar src={props.profilePicture} className="App-AvatarIcon">
                 <PersonIcon className="PersonIcon" />
               </Avatar>
             </div>
@@ -269,16 +253,16 @@ function ProfMenu(props) {
           horizontal: "center",
         }}
       >
-        <MenuItem onClick={setOnline} disabled={status === "Online"}>
+        <MenuItem onClick={setOnline} disabled={props.status === "Online"}>
           Go Online
         </MenuItem>
-        <MenuItem onClick={setOffline} disabled={status === "Offline"}>
+        <MenuItem onClick={setOffline} disabled={props.status === "Offline"}>
           Go Offline
         </MenuItem>
-        <MenuItem onClick={setAway} disabled={status === "Away"}>
+        <MenuItem onClick={setAway} disabled={props.status === "Away"}>
           Go Away
         </MenuItem>
-        <MenuItem onClick={setDnD} disabled={status === "DnD"}>
+        <MenuItem onClick={setDnD} disabled={props.status === "DnD"}>
           Go Do Not Disturb
         </MenuItem>
       </Popover>
@@ -313,6 +297,7 @@ function App(props) {
   const [downloadSpeed, setDownloadSpeed] = React.useState(-100);
   const [downloadTotal, setDownloadTotal] = React.useState(-100);
   const [downloadCurrent, setDownloadCurrent] = React.useState(-100);
+  const [userSet, setUserSet] = React.useState(false);
 
   let user = firebase.auth().currentUser;
   let db = firebase.firestore();
@@ -452,6 +437,11 @@ function App(props) {
       if (tempUser) {
         user = tempUser;
         checkUserExists();
+
+        if (userSet === false) {
+          props.awaitProfileChanges(user, db);
+          setUserSet(true);
+        }
       } else {
         user = undefined;
       }

@@ -6,8 +6,7 @@ const mapState = (state) => ({
   loggedIn: state.userInformation.loggedIn,
   profilePicture: state.myProfile.profilePicture,
   username: state.myProfile.username,
-  snackbarOpen: state.snackbar.snackbarOpen,
-  snackbarText: state.snackbar.snackbarText,
+  bio: state.myProfile.bio,
 });
 
 const mapDispatch = (dispatch) => ({
@@ -16,7 +15,7 @@ const mapDispatch = (dispatch) => ({
   setProfilePicture: (newProfilePicture, user, database) => dispatch.myProfile.setProfilePicture({ newProfilePicture, user, database }),
   setUsername: (newUsername, user, database) => dispatch.myProfile.setUsername({ newUsername, user, database }),
   setProfile: (newProfile, user, database) => dispatch.myProfile.setProfile({ newProfile, user, database }),
-  awaitProfileChanges: (user, database, callback) => dispatch.myProfile.awaitProfileChanges({ user, database, callback }),
+  setBio: (newBio, user, database) => dispatch.myProfile.setBio({ newBio, user, database }),
   setSnackbarOpen: () => dispatch.snackbar.setSnackbarOpen(),
   setSnackbarClosed: () => dispatch.snackbar.setSnackbarClosed(),
   setSnackbarText: (newText) => dispatch.snackbar.setSnackbarText(newText),

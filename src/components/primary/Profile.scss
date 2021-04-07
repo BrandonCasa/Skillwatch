@@ -78,6 +78,7 @@
                   opacity: 0;
                   color: white;
                   z-index: 1;
+                  transform: translate(0, 50%);
                   transition: opacity 225ms ease-in-out;
                 }
                 .TextOverlayVisible {

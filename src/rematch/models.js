@@ -66,6 +66,8 @@ export const userInformation = {
 const defaultMyProfile = {
   profilePicture: "",
   username: "",
+  bio: "",
+  status: "Error",
 };
 
 export const myProfile = {
@@ -81,12 +83,30 @@ export const myProfile = {
   },
   effects: (dispatch) => {
     return {
+      async setStatus(payload, state) {
+        await payload.database.collection("users").doc(payload.user.uid).update({
+          status: payload.newStatus,
+        });
+
+        return {
+          ...state,
+          status: payload.newStatus,
+        };
+      },
+      async setBio(payload, state) {
+        await payload.database.collection("users").doc(payload.user.uid).update({
+          bio: payload.newBio,
+        });
+
+        return {
+          ...state,
+          bio: payload.newBio,
+        };
+      },
       async setProfilePicture(payload, state) {
         await payload.database.collection("users").doc(payload.user.uid).update({
           pfp: payload.newProfilePicture,
         });
-        dispatch.snackbar.setSnackbarOpen();
-        dispatch.snackbar.setSnackbarText("Profile Picture Updated.");
 
         return {
           ...state,
@@ -105,8 +125,6 @@ export const myProfile = {
         await payload.database.collection("users").doc("FriendStore").update({
           usernames: usernames,
         });
-        dispatch.snackbar.setSnackbarOpen();
-        dispatch.snackbar.setSnackbarText("Username Updated.");
 
         return {
           ...state,
@@ -118,8 +136,7 @@ export const myProfile = {
           .collection("users")
           .doc(payload.user.uid)
           .onSnapshot((snapshot) => {
-            payload.callback(snapshot);
-            dispatch.myProfile.setProfile({ username: snapshot.data().username, profilePicture: snapshot.data().pfp });
+            dispatch.myProfile.setProfile({ username: snapshot.data().username, profilePicture: snapshot.data().pfp, bio: snapshot.data().bio, status: snapshot.data().status });
           });
       },
     };
