@@ -80,6 +80,8 @@ function ProfileLoggedIn(props) {
     }
   }, [props.bio]);
 
+  console.log(props.bio);
+
   return (
     <div className="ProfileInner">
       <div className="Top">

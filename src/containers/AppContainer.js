@@ -8,6 +8,8 @@ const mapState = (state) => ({
   snackbarOpen: state.snackbar.snackbarOpen,
   snackbarText: state.snackbar.snackbarText,
   status: state.myProfile.status,
+  colors: state.myProfile.colors,
+  theme: state.myProfile.theme,
 });
 
 const mapDispatch = (dispatch) => ({
@@ -18,6 +20,8 @@ const mapDispatch = (dispatch) => ({
   setSnackbarOpen: () => dispatch.snackbar.setSnackbarOpen(),
   setSnackbarClosed: () => dispatch.snackbar.setSnackbarClosed(),
   setSnackbarText: (newText) => dispatch.snackbar.setSnackbarText(newText),
+  setColors: (newColors) => dispatch.myProfile.setColors({ colors: newColors }),
+  saveColors: (user, database) => dispatch.myProfile.saveColors({ user, database }),
 });
 
 const AppContainer = connect(mapState, mapDispatch)(App);

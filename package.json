@@ -1,6 +1,6 @@
 {
   "name": "skillwatch",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "private": true,
   "main": "public/electron.js",
   "homepage": "./",
@@ -25,6 +25,7 @@
     "is-electron": "^2.2.0",
     "node-sass": "4.14.1",
     "react": "^17.0.1",
+    "react-color": "^2.19.3",
     "react-dom": "^17.0.1",
     "react-redux": "^7.2.2",
     "react-router-dom": "^5.2.0",

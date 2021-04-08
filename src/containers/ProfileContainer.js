@@ -7,6 +7,7 @@ const mapState = (state) => ({
   profilePicture: state.myProfile.profilePicture,
   username: state.myProfile.username,
   bio: state.myProfile.bio,
+  colors: state.myProfile.colors,
 });
 
 const mapDispatch = (dispatch) => ({

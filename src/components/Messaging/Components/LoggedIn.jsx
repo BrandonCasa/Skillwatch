@@ -33,24 +33,14 @@ function LoggedIn(props) {
   };
   const currentTabContent = (props) => {
     switch (currentTab) {
-      case 0:
-        return (
-          <CurrentChannelTab
-            setSnackbarOpen={setSnackbarOpen}
-            setSnackbarText={setSnackbarText}
-            setFriends={setFriends}
-            currentChannel={currentChannel}
-            setCurrentChannel={setCurrentChannel}
-            friends={friends}
-            {...props}
-          />
-        );
-      case 1:
-        return <FriendListTab setSnackbarOpen={setSnackbarOpen} setSnackbarText={setSnackbarText} setFriends={setFriends} friends={friends} {...props} />;
-      case 2:
-        return "Blocked List";
-      default:
-        return "Unknown Tab";
+    case 0:
+      return <CurrentChannelTab setSnackbarOpen={setSnackbarOpen} setSnackbarText={setSnackbarText} setFriends={setFriends} currentChannel={currentChannel} setCurrentChannel={setCurrentChannel} friends={friends} {...props} />;
+    case 1:
+      return <FriendListTab setSnackbarOpen={setSnackbarOpen} setSnackbarText={setSnackbarText} setFriends={setFriends} friends={friends} {...props} />;
+    case 2:
+      return "Blocked List";
+    default:
+      return "Unknown Tab";
     }
   };
 

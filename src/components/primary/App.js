@@ -46,12 +46,6 @@ import ProfileContainer from "../../containers/ProfileContainer";
 import MessagingContainer from "../../containers/MessagingContainer";
 import SettingsPageContainer from "../../containers/SettingsPageContainer";
 
-const theme = createMuiTheme({
-  palette: {
-    type: "dark",
-  },
-});
-
 function LoginRegisterBtn(props) {
   const [open, setOpen] = React.useState(false);
   const [email, setEmail] = React.useState("");
@@ -335,6 +329,20 @@ function App(props) {
     incomingFriendRequests: [],
     outgoingFriendRequests: [],
     status: "Online",
+    colors: {
+      primary: {
+        light: "#757ce8",
+        main: "#3f50b5",
+        dark: "#002884",
+        contrastText: "#fff",
+      },
+      secondary: {
+        light: "#ff7961",
+        main: "#f44336",
+        dark: "#ba000d",
+        contrastText: "#000",
+      },
+    },
   };
 
   // Functions
@@ -475,15 +483,13 @@ function App(props) {
   return (
     <Router>
       <div className="App">
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={props.theme}>
           <CssBaseline />
           <Dialog open={updateDialog}>
             <DialogTitle id="form-dialog-title">An Update is Downloading</DialogTitle>
             {downloading && (
               <DialogContent>
-                <Typography variant="h5">
-                  Download speed (MB/s): {(downloadSpeed * 0.000001).toString().includes(".") ? (downloadSpeed * 0.000001).toString().split(".")[0] : (downloadSpeed * 0.000001).toString()}.
-                </Typography>
+                <Typography variant="h5">Download speed (MB/s): {(downloadSpeed * 0.000001).toString().includes(".") ? (downloadSpeed * 0.000001).toString().split(".")[0] : (downloadSpeed * 0.000001).toString()}.</Typography>
                 <Box position="relative" display="inline-flex">
                   <CircularProgress variant="determinate" value={downloadProgress} />
                   <Box top={0} left={0} bottom={0} right={0} position="absolute" display="flex" alignItems="center" justifyContent="center">
