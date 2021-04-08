@@ -16,14 +16,19 @@ import AddIcon from "@material-ui/icons/Add";
 import "./CurrentChannelTab.scss";
 // Custom Components
 import FriendChannel from "./FriendChannel";
+import PublicChannel from "./PublicChannel";
 
 function Channels(props) {
   const onClickFriend = (event, friendId) => {
     props.setCurrentChannel(friendId);
   };
+  const onClickPublicChannel = (event, channelName) => {
+    props.setCurrentChannel(channelName);
+  };
 
   return (
     <>
+      <PublicChannel channelName={"Region"} selected={props.currentChannel === "Region"} clicky={onClickPublicChannel} />
       {props.friends.map((friendId, id) => (
         <FriendChannel theKey={id} selected={props.currentChannel === friendId || (id === 0 && props.currentChannel === "")} friendId={friendId} key={id} clicky={onClickFriend} {...props} />
       ))}
@@ -38,7 +43,9 @@ function Username(props) {
   let userId = "";
   userId = userId + props.friendId;
 
-  if (userId !== "") {
+  if (userId === "Region") {
+    return "Region";
+  } else if (userId !== "") {
     props.database
       .collection("users")
       .doc(userId)

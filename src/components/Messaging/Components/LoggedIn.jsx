@@ -16,7 +16,7 @@ import CurrentChannelTab from "../../CurrentChannel/Components/CurrentChannelTab
 import FriendListTab from "../../Friends/Components/FriendListTab";
 
 function LoggedIn(props) {
-  const [currentChannel, setCurrentChannel] = React.useState("");
+  const [currentChannel, setCurrentChannel] = React.useState("Region");
   const [currentTab, setCurrentTab] = React.useState(0);
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
   const [snackbarText, setSnackbarText] = React.useState("");
@@ -62,9 +62,6 @@ function LoggedIn(props) {
         if (snapshot.exists) {
           if (snapshot.data().hasOwnProperty("friends")) {
             setFriends(snapshot.data().friends);
-            if (snapshot.data().friends.length > -1) {
-              setCurrentChannel(snapshot.data().friends[0]);
-            }
           }
         }
       });

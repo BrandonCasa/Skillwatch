@@ -48,7 +48,11 @@ ipcMain.on("toMain", (event, arg) => {
   } else if (arg === "minimize-app") {
     mainWindow.minimize();
   } else if (arg === "maximize-app") {
-    mainWindow.maximize();
+    if (mainWindow.isMaximized()) {
+      mainWindow.restore();
+    } else {
+      mainWindow.maximize();
+    }
   }
 });
 
