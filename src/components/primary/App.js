@@ -44,6 +44,7 @@ import "./App.scss";
 import HomeContainer from "../../containers/HomeContainer";
 import ProfileContainer from "../../containers/ProfileContainer";
 import MessagingContainer from "../../containers/MessagingContainer";
+import SettingsPageContainer from "../../containers/SettingsPageContainer";
 
 const theme = createMuiTheme({
   palette: {
@@ -157,30 +158,30 @@ function LoginRegisterBtn(props) {
 function ProfMenu(props) {
   const history = useHistory();
 
-  const [profBtnAnchorEl, setProfBtnAnchorEl] = React.useState(null);
+  const [settingsBtnAnchorEl, setSettingsBtnAnchorEl] = React.useState(null);
   const [statusMenuAnchorEl, setStatusMenuAnchorEl] = React.useState(null);
   const statusMenuOpen = Boolean(statusMenuAnchorEl);
-  const [toProfileAllowed, setToProfileAllowed] = React.useState(!(history.location.pathname === "/account/profile"));
-  const profBtnOpen = Boolean(profBtnAnchorEl);
+  const [toSettingsAllowed, setToSettingsAllowed] = React.useState(!(history.location.pathname === "/account/settings"));
+  const settingsBtnOpen = Boolean(settingsBtnAnchorEl);
 
   let db = firebase.firestore();
   let user = firebase.auth().currentUser;
 
   const handleMenu = (event) => {
-    setProfBtnAnchorEl(event.currentTarget);
+    setSettingsBtnAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
-    setProfBtnAnchorEl(null);
+    setSettingsBtnAnchorEl(null);
   };
   const handleCloseStatusMenu = () => {
     setStatusMenuAnchorEl(null);
   };
-  const toProfile = () => {
-    setProfBtnAnchorEl(null);
-    history.push("/account/profile");
+  const toSettings = () => {
+    setSettingsBtnAnchorEl(null);
+    history.push("/account/settings");
   };
   const logOut = () => {
-    setProfBtnAnchorEl(null);
+    setSettingsBtnAnchorEl(null);
     firebase.auth().signOut();
   };
   const setOnline = () => {
@@ -209,10 +210,10 @@ function ProfMenu(props) {
       }
     });
     history.listen((location, action) => {
-      if (action === "PUSH" && location.pathname === "/account/profile") {
-        setToProfileAllowed(false);
-      } else if (action === "PUSH" && !(location.pathname === "/account/profile")) {
-        setToProfileAllowed(true);
+      if (action === "PUSH" && location.pathname === "/account/settings") {
+        setToSettingsAllowed(false);
+      } else if (action === "PUSH" && location.pathname !== "/account/settings") {
+        setToSettingsAllowed(true);
       }
     });
   }, []);
@@ -291,9 +292,9 @@ function ProfMenu(props) {
       </Popover>
       <Popover
         id="menu-appbar"
-        open={profBtnOpen}
+        open={settingsBtnOpen}
         onClose={handleClose}
-        anchorEl={profBtnAnchorEl}
+        anchorEl={settingsBtnAnchorEl}
         anchorOrigin={{
           vertical: "bottom",
           horizontal: "center",
@@ -303,8 +304,8 @@ function ProfMenu(props) {
           horizontal: "center",
         }}
       >
-        <MenuItem onClick={toProfile} disabled={!toProfileAllowed}>
-          Profile
+        <MenuItem onClick={toSettings} disabled={!toSettingsAllowed}>
+          Settings
         </MenuItem>
         <MenuItem onClick={logOut}>Logout</MenuItem>
       </Popover>
@@ -570,6 +571,9 @@ function App(props) {
           <Switch>
             <Route path="/messaging">
               <MessagingContainer checkUserExists={checkUserExists} user={user} database={db} />
+            </Route>
+            <Route path="/account/settings">
+              <SettingsPageContainer user={user} database={db} />
             </Route>
             <Route path="/account/profile">
               <ProfileContainer user={user} database={db} />

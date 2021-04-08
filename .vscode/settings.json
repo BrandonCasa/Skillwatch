@@ -1,3 +1,10 @@
 {
-  "git.ignoreLimitWarning": true
+  "git.ignoreLimitWarning": true,
+  "editor.tabSize": 2,
+  "editor.detectIndentation": false,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
+  "html.format.wrapLineLength": 0,
+  "diffEditor.wordWrap": "off",
+  "terminal.integrated.shell.windows": "C:/WINDOWS/system32/cmd.exe"
 }
