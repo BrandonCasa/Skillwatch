@@ -1,5 +1,5 @@
 import React from "react";
-
+import randomUsernameGen from "random-username-generator";
 import clsx from "clsx";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -320,9 +320,8 @@ function App(props) {
   let user = firebase.auth().currentUser;
   let db = firebase.firestore();
   let defaultUser = {
-    username: "",
+    username: randomUsernameGen.generate(),
     friends: [],
-    channels: [],
     pfp: "",
     bio: "",
     selfTags: [],
