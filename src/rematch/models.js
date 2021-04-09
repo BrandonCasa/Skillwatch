@@ -209,7 +209,9 @@ export const myProfile = {
 
         return {
           ...state,
-          status: payload.newStatus,
+          myProfile: {
+            status: payload.newStatus,
+          },
         };
       },
       async setBio(payload, state) {
@@ -219,7 +221,9 @@ export const myProfile = {
 
         return {
           ...state,
-          bio: payload.newBio,
+          myProfile: {
+            bio: payload.newBio,
+          },
         };
       },
       async setProfilePicture(payload, state) {
@@ -229,25 +233,33 @@ export const myProfile = {
 
         return {
           ...state,
-          profilePicture: payload.newProfilePicture,
+          myProfile: {
+            profilePicture: payload.newProfilePicture,
+          },
         };
       },
       async setUsername(payload, state) {
         let friendStoreSnap = await payload.database.collection("users").doc("FriendStore").get();
         let usernames = friendStoreSnap.data().usernames;
-        delete usernames[state.username];
+        delete usernames[state.myProfile.username];
         usernames[payload.newUsername] = payload.user.uid;
 
-        await payload.database.collection("users").doc(payload.user.uid).update({
-          username: payload.newUsername,
-        });
-        await payload.database.collection("users").doc("FriendStore").update({
-          usernames: usernames,
-        });
+        let snapshot = await payload.database.collection("users").doc("FriendStore").get();
+
+        if (!snapshot.data().usernames.hasOwnProperty(payload.newUsername)) {
+          await payload.database.collection("users").doc(payload.user.uid).update({
+            username: payload.newUsername,
+          });
+          await payload.database.collection("users").doc("FriendStore").update({
+            usernames: usernames,
+          });
+        }
 
         return {
           ...state,
-          username: payload.newUsername,
+          myProfile: {
+            username: payload.newUsername,
+          },
         };
       },
       awaitProfileChanges(payload, state) {

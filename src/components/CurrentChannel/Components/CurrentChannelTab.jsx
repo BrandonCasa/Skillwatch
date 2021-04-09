@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import clsx from "clsx";
+import randomUsernameGen from "random-username-generator";
 // Material UI
 import Paper from "@material-ui/core/Paper";
 import IconButton from "@material-ui/core/IconButton";
@@ -12,6 +13,12 @@ import TextField from "@material-ui/core/TextField";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import SearchIcon from "@material-ui/icons/Search";
 import AddIcon from "@material-ui/icons/Add";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemAvatar from "@material-ui/core/ListItemAvatar";
+import Avatar from "@material-ui/core/Avatar";
+import Typography from "@material-ui/core/Typography";
+
 // SCSS
 import "./CurrentChannelTab.scss";
 // Custom Components
@@ -21,10 +28,16 @@ import PublicChannel from "./PublicChannel";
 function Channels(props) {
   const onClickFriend = (event, friendId) => {
     props.setCurrentChannel(friendId);
+    props.onChangeChannel(friendId);
   };
   const onClickPublicChannel = (event, channelName) => {
     props.setCurrentChannel(channelName);
+    props.onChangeChannel("PUBLIC:Region");
   };
+
+  React.useEffect(() => {
+    props.onChangeChannel("PUBLIC:Region");
+  }, []);
 
   return (
     <>
@@ -37,41 +50,57 @@ function Channels(props) {
   );
 }
 
-function Username(props) {
-  const [username, setUsername] = React.useState("");
-
-  let userId = "";
-  userId = userId + props.friendId;
-
-  if (userId === "Region") {
-    return "Region";
-  } else if (userId !== "") {
-    props.database
-      .collection("users")
-      .doc(userId)
-      .onSnapshot((snapshot) => {
-        if (snapshot.exists) {
-          if (snapshot.data().hasOwnProperty("username") && snapshot.data().username !== props.friendId) {
-            setUsername(snapshot.data().username);
-          }
-        }
-      });
-  }
-
-  return username;
-}
+function Message(props) {}
 
 function CurrentChannelTab(props) {
+  const [usernameMap, setUsernameMap] = React.useState({});
+  const [currentChannelName, setCurrentChannelName] = React.useState("");
+
+  const changeChannel = (id) => {
+    if (!id.startsWith("PUBLIC:")) {
+      let friendId = id;
+      if (usernameMap.hasOwnProperty(friendId)) {
+        setCurrentChannelName(usernameMap[friendId]);
+      } else {
+        props.database
+          .collection("users")
+          .doc(friendId)
+          .onSnapshot((docSnapshot) => {
+            let usernameMapSub = usernameMap;
+            if (docSnapshot.data().username !== friendId) {
+              usernameMapSub[friendId] = docSnapshot.data().username;
+              setUsernameMap(usernameMapSub);
+              setCurrentChannelName(docSnapshot.data().username);
+            } else {
+              let randName = randomUsernameGen.generate();
+              usernameMapSub[friendId] = randName;
+              setUsernameMap(usernameMapSub);
+              setCurrentChannelName(randName);
+            }
+          });
+      }
+    } else {
+      let channelName = id.replace("PUBLIC:", "");
+      setCurrentChannelName(channelName);
+    }
+  };
+
   return (
     <div className="CurrentChannel-Content">
       <div className="CurrentChannel-Chat">
         <Paper className="CurrentChannel-ChatPaper" variant="outlined">
-          <ListSubheader component="div">
-            Channel History: (<Username friendId={props.currentChannel} {...props} />)
-          </ListSubheader>
+          <ListSubheader component="div">Channel History: ({currentChannelName})</ListSubheader>
           <Divider />
           <div className="CurrentChannel-ChatWindow">
-            <List className="CurrentChannel-ChatList">xd</List>
+            <List className="CurrentChannel-ChatList">
+              <ListItem alignItems="flex-start">
+                <ListItemAvatar>
+                  <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
+                </ListItemAvatar>
+                <ListItemText primary="Sender" secondary={<React.Fragment>{"I'll be in your neighborhood doing errands this weekend."}</React.Fragment>} />
+              </ListItem>
+              <Divider variant="inset" component="li" />
+            </List>
             <Paper className="CurrentChannel-ChatInput" variant="outlined">
               <IconButton className="CurrentChannel-AddButton" color="secondary">
                 <AddIcon />
@@ -109,7 +138,7 @@ function CurrentChannelTab(props) {
           <ListSubheader component="div">{`Channel Select`}</ListSubheader>
           <Divider />
           <List>
-            <Channels {...props} />
+            <Channels onChangeChannel={changeChannel} {...props} />
           </List>
         </Paper>
       </div>

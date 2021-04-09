@@ -32,7 +32,6 @@ function SettingsPageNotLoggedIn(props) {
 function SettingsPageLoggedIn(props) {
   const [color, setColor] = React.useState(props.colors.primary.main);
   const [setupCompletePrimary, setSetupCompletePrimary] = React.useState(0);
-  const [setupCompleteSecondary, setSetupCompleteSecondary] = React.useState(0);
   const [mode, setMode] = React.useState("primary");
 
   const setColors = (event) => {
