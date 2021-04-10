@@ -25,29 +25,8 @@ import FriendChannel from "./FriendChannel";
 import PublicChannel from "./PublicChannel";
 
 function Channels(props) {
-  const subToUsername = (friendId, callback) => {
-    if (!props.usernameMap.hasOwnProperty(friendId)) {
-      props.database
-        .collection("users")
-        .doc(friendId)
-        .onSnapshot((snapshot) => {
-          if (snapshot.exists && snapshot.data().username !== props.usernameMap[friendId]) {
-            if (props.channelName === props.usernameMap[friendId]) {
-              props.setChannelName(snapshot.data().username);
-            }
-
-            let oldUsernameMap = props.usernameMap;
-            oldUsernameMap[friendId] = snapshot.data().username;
-            props.setUsernameMap(oldUsernameMap);
-            callback(snapshot.data().username);
-          }
-        });
-    } else {
-      callback(props.usernameMap[friendId]);
-    }
-  };
-
   const onClickFriend = (event, friendId) => {
+    props.setMessages([]);
     let docRefA = props.database.collection("chatChannels").doc(`${props.user.uid} - ${friendId}`);
     let docRefB = props.database.collection("chatChannels").doc(`${friendId} - ${props.user.uid}`);
 
@@ -55,8 +34,17 @@ function Channels(props) {
       if (docA.exists) {
         // If `${props.user.uid} - ${friendId}` DOES exist
         props.setCurrentChannel(`${props.user.uid} - ${friendId}`);
-        subToUsername(friendId, (theName) => {
+        props.subToUsername(friendId, (theName) => {
           props.setChannelName(theName);
+
+          props.database
+            .collection("chatChannels")
+            .doc(`${props.user.uid} - ${friendId}`)
+            .onSnapshot((snapshot) => {
+              if (snapshot.exists) {
+                props.setMessages(snapshot.data().messages);
+              }
+            });
         });
       } else {
         // If `${props.user.uid} - ${friendId}` DOES NOT exist
@@ -64,15 +52,31 @@ function Channels(props) {
           if (docB.exists) {
             // If `${friendId} - ${props.user.uid}` DOES exist
             props.setCurrentChannel(`${friendId} - ${props.user.uid}`);
-            subToUsername(friendId, (theName) => {
+            props.subToUsername(friendId, (theName) => {
               props.setChannelName(theName);
+              props.database
+                .collection("chatChannels")
+                .doc(`${friendId} - ${props.user.uid}`)
+                .onSnapshot((snapshot) => {
+                  if (snapshot.exists) {
+                    props.setMessages(snapshot.data().messages);
+                  }
+                });
             });
           } else {
             // If `${friendId} - ${props.user.uid}` DOES NOT exist
             props.database.collection("chatChannels").doc(`${props.user.uid} - ${friendId}`).set({ messages: [] });
             props.setCurrentChannel(`${props.user.uid} - ${friendId}`);
-            subToUsername(friendId, (theName) => {
+            props.subToUsername(friendId, (theName) => {
               props.setChannelName(theName);
+              props.database
+                .collection("chatChannels")
+                .doc(`${props.user.uid} - ${friendId}`)
+                .onSnapshot((snapshot) => {
+                  if (snapshot.exists) {
+                    props.setMessages(snapshot.data().messages);
+                  }
+                });
             });
           }
         });
@@ -80,9 +84,30 @@ function Channels(props) {
     });
   };
   const onClickPublicChannel = (event, channelName) => {
+    props.setMessages([]);
     props.setCurrentChannel(channelName);
     props.setChannelName(channelName);
+    props.database
+      .collection("chatChannels")
+      .doc(channelName)
+      .onSnapshot((snapshot) => {
+        if (snapshot.exists) {
+          props.setMessages(snapshot.data().messages);
+        }
+      });
   };
+
+  React.useEffect(() => {
+    if (props.currentChannel === "Region") {
+      props.database
+        .collection("chatChannels")
+        .doc("Region")
+        .get()
+        .then((snapshot) => {
+          props.setMessages(snapshot.data().messages);
+        });
+    }
+  }, []);
 
   return (
     <>
@@ -111,42 +136,97 @@ function Channels(props) {
 }
 
 function Message(props) {
-  let senderName = "";
-  if (props.message.sender === props.user.uid) {
-    senderName = props.username;
-  } else {
-    props.saveUsername(props.message.sender);
-    senderName = props.usernameMap[props.message.sender];
-  }
+  const [theUsername, setTheUsername] = React.useState(props.message.sender === props.user.uid ? props.username : props.usernameMap[props.message.sender]);
 
-  if (props.hasDivider) {
-    return (
-      <>
-        <ListItem alignItems="flex-start">
-          <ListItemAvatar>
-            <Avatar alt={senderName} src="/static/images/avatar/1.jpg" />
-          </ListItemAvatar>
-          <ListItemText primary={senderName} secondary={<React.Fragment>{props.message.messageContent}</React.Fragment>} />
-        </ListItem>
+  if (props.message.channel === props.currentChannel) {
+    if (props.message.sender !== props.user.uid && !props.usernameMap.hasOwnProperty(props.message.sender)) {
+      props.subToUsername(props.message.sender, (theName) => {
+        setTheUsername(theName);
+      });
+    }
 
-        <Divider variant="inset" component="li" />
-      </>
-    );
+    if (props.hasDivider) {
+      return (
+        <>
+          <ListItem alignItems="flex-start">
+            <ListItemAvatar>
+              <Avatar alt={theUsername} src="/static/images/avatar/1.jpg" />
+            </ListItemAvatar>
+            <ListItemText primary={theUsername} secondary={<React.Fragment>{props.message.messageContent}</React.Fragment>} />
+          </ListItem>
+
+          <Divider variant="inset" component="li" />
+        </>
+      );
+    } else {
+      return (
+        <>
+          <ListItem alignItems="flex-start">
+            <ListItemAvatar>
+              <Avatar alt={theUsername} src="/static/images/avatar/1.jpg" />
+            </ListItemAvatar>
+            <ListItemText primary={theUsername} secondary={<React.Fragment>{props.message.messageContent}</React.Fragment>} />
+          </ListItem>
+        </>
+      );
+    }
   } else {
-    return (
-      <>
-        <ListItem alignItems="flex-start">
-          <ListItemAvatar>
-            <Avatar alt={senderName} src="/static/images/avatar/1.jpg" />
-          </ListItemAvatar>
-          <ListItemText primary={senderName} secondary={<React.Fragment>{props.message.messageContent}</React.Fragment>} />
-        </ListItem>
-      </>
-    );
+    return "";
   }
 }
 
 function CurrentChannelTab(props) {
+  const [messages, setMessages] = React.useState([]);
+
+  const subToUsername = (friendId, callback) => {
+    if (!props.usernameMap.hasOwnProperty(friendId)) {
+      props.database
+        .collection("users")
+        .doc(friendId)
+        .onSnapshot((snapshot) => {
+          if (snapshot.exists && snapshot.data().username !== props.usernameMap[friendId]) {
+            if (props.channelName === props.usernameMap[friendId]) {
+              props.setChannelName(snapshot.data().username);
+            }
+
+            let oldUsernameMap = props.usernameMap;
+            oldUsernameMap[friendId] = snapshot.data().username;
+            props.setUsernameMap(oldUsernameMap);
+            callback(snapshot.data().username);
+          }
+        });
+    } else {
+      callback(props.usernameMap[friendId]);
+    }
+  };
+
+  const sendMessage = () => {
+    let inputBox = document.getElementById("InputBox");
+    props.database
+      .collection("chatChannels")
+      .doc(props.currentChannel)
+      .get()
+      .then((docSnapshot) => {
+        if (docSnapshot.exists) {
+          let oldMessages = docSnapshot.data().messages;
+          oldMessages.push({ sender: props.user.uid, messageContent: inputBox.value, channel: props.currentChannel });
+          props.database
+            .collection("chatChannels")
+            .doc(props.currentChannel)
+            .update({
+              messages: oldMessages,
+            })
+            .then(() => {
+              console.log(`Successfully sent message.`);
+              inputBox.value = "";
+            })
+            .catch((error) => {
+              console.error("Error sending message", error);
+            });
+        }
+      });
+  };
+
   return (
     <div className="CurrentChannel-Content">
       <div className="CurrentChannel-Chat">
@@ -154,13 +234,17 @@ function CurrentChannelTab(props) {
           <ListSubheader component="div">Channel History: ({props.channelName})</ListSubheader>
           <Divider />
           <div className="CurrentChannel-ChatWindow">
-            <List className="CurrentChannel-ChatList"></List>
+            <List className="CurrentChannel-ChatList">
+              {messages.map((message, id) => {
+                return <Message subToUsername={subToUsername} key={id} message={message} {...props} />;
+              })}
+            </List>
             <Paper className="CurrentChannel-ChatInput" variant="outlined">
               <IconButton className="CurrentChannel-AddButton" color="secondary">
                 <AddIcon />
               </IconButton>
-              <TextField size="small" placeholder="Message" className="CurrentChannel-ChatTextField" color="secondary" fullWidth />
-              <IconButton className="CurrentChannel-SendButton" color="secondary">
+              <TextField id="InputBox" size="small" placeholder="Message" className="CurrentChannel-ChatTextField" color="secondary" fullWidth />
+              <IconButton className="CurrentChannel-SendButton" color="secondary" onClick={sendMessage}>
                 <SendIcon />
               </IconButton>
             </Paper>
@@ -192,7 +276,7 @@ function CurrentChannelTab(props) {
           <ListSubheader component="div">{`Channel Select`}</ListSubheader>
           <Divider />
           <List>
-            <Channels setChannelName={props.setChannelName} channelName={props.channelName} {...props} />
+            <Channels setMessages={setMessages} subToUsername={subToUsername} {...props} />
           </List>
         </Paper>
       </div>
