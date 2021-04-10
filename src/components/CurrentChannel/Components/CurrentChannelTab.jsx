@@ -102,9 +102,10 @@ function Channels(props) {
       props.database
         .collection("chatChannels")
         .doc("Region")
-        .get()
-        .then((snapshot) => {
-          props.setMessages(snapshot.data().messages);
+        .onSnapshot((snapshot) => {
+          if (snapshot.exists) {
+            props.setMessages(snapshot.data().messages);
+          }
         });
     }
   }, []);
