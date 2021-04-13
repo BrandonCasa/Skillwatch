@@ -26,7 +26,6 @@ import PublicChannel from "./PublicChannel";
 
 function Channels(props) {
   const onClickFriend = (event, friendId) => {
-    props.setMessages([]);
     let docRefA = props.database.collection("chatChannels").doc(`${props.user.uid} - ${friendId}`);
     let docRefB = props.database.collection("chatChannels").doc(`${friendId} - ${props.user.uid}`);
 
@@ -34,87 +33,30 @@ function Channels(props) {
       if (docA.exists) {
         // If `${props.user.uid} - ${friendId}` DOES exist
         props.setCurrentChannel(`${props.user.uid} - ${friendId}`);
-        props.subToUsername(friendId, (theName) => {
-          props.setChannelName(theName);
-
-          props.database
-            .collection("chatChannels")
-            .doc(`${props.user.uid} - ${friendId}`)
-            .onSnapshot((snapshot) => {
-              if (snapshot.exists) {
-                props.setMessages(snapshot.data().messages);
-              }
-            });
-        });
       } else {
         // If `${props.user.uid} - ${friendId}` DOES NOT exist
         docRefB.get().then((docB) => {
           if (docB.exists) {
             // If `${friendId} - ${props.user.uid}` DOES exist
             props.setCurrentChannel(`${friendId} - ${props.user.uid}`);
-            props.subToUsername(friendId, (theName) => {
-              props.setChannelName(theName);
-              props.database
-                .collection("chatChannels")
-                .doc(`${friendId} - ${props.user.uid}`)
-                .onSnapshot((snapshot) => {
-                  if (snapshot.exists) {
-                    props.setMessages(snapshot.data().messages);
-                  }
-                });
-            });
           } else {
             // If `${friendId} - ${props.user.uid}` DOES NOT exist
             props.database.collection("chatChannels").doc(`${props.user.uid} - ${friendId}`).set({ messages: [] });
             props.setCurrentChannel(`${props.user.uid} - ${friendId}`);
-            props.subToUsername(friendId, (theName) => {
-              props.setChannelName(theName);
-              props.database
-                .collection("chatChannels")
-                .doc(`${props.user.uid} - ${friendId}`)
-                .onSnapshot((snapshot) => {
-                  if (snapshot.exists) {
-                    props.setMessages(snapshot.data().messages);
-                  }
-                });
-            });
           }
         });
       }
     });
   };
   const onClickPublicChannel = (event, channelName) => {
-    props.setMessages([]);
     props.setCurrentChannel(channelName);
-    props.setChannelName(channelName);
-    props.database
-      .collection("chatChannels")
-      .doc(channelName)
-      .onSnapshot((snapshot) => {
-        if (snapshot.exists) {
-          props.setMessages(snapshot.data().messages);
-        }
-      });
   };
-
-  React.useEffect(() => {
-    if (props.currentChannel === "Region") {
-      props.database
-        .collection("chatChannels")
-        .doc("Region")
-        .onSnapshot((snapshot) => {
-          if (snapshot.exists) {
-            props.setMessages(snapshot.data().messages);
-          }
-        });
-    }
-  }, []);
 
   return (
     <>
       <PublicChannel
         channelName={"Region"}
-        selected={props.currentChannel === "Region"}
+        selected={props.currentChannelId === "Region"}
         clicky={(event) => {
           onClickPublicChannel(event, "Region");
         }}
@@ -122,7 +64,7 @@ function Channels(props) {
       {props.friends.map((friendId, id) => (
         <FriendChannel
           theKey={id}
-          selected={props.currentChannel === `${props.user.uid} - ${friendId}` || props.currentChannel === `${friendId} - ${props.user.uid}`}
+          selected={props.currentChannelId === `${props.user.uid} - ${friendId}` || props.currentChannel === `${friendId} - ${props.user.uid}`}
           friendId={friendId}
           key={id}
           clicky={(event) => {
@@ -137,152 +79,229 @@ function Channels(props) {
 }
 
 function Message(props) {
-  const [theUsername, setTheUsername] = React.useState(props.message.sender === props.user.uid ? props.username : props.usernameMap[props.message.sender]);
+  const [username, setUsername] = React.useState("ERROR");
+  const [pfpBlob, setPfpBlob] = React.useState("");
 
-  if (props.message.channel === props.currentChannel) {
-    if (props.message.sender !== props.user.uid && !props.usernameMap.hasOwnProperty(props.message.sender)) {
-      props.subToUsername(props.message.sender, (theName) => {
-        setTheUsername(theName);
-      });
-    }
+  props.database
+    .collection("users")
+    .doc(props.thisMessage.sender)
+    .onSnapshot((snapshot) => {
+      if (snapshot.exists) {
+        if (username !== snapshot.data().username) {
+          setUsername(snapshot.data().username);
+        }
+        if (pfpBlob !== snapshot.data().pfp) {
+          setPfpBlob(snapshot.data().pfp);
+        }
+      }
+    });
 
-    if (props.hasDivider) {
-      return (
-        <>
-          <ListItem alignItems="flex-start">
-            <ListItemAvatar>
-              <Avatar alt={theUsername} src="/static/images/avatar/1.jpg" />
-            </ListItemAvatar>
-            <ListItemText primary={theUsername} secondary={<React.Fragment>{props.message.messageContent}</React.Fragment>} />
-          </ListItem>
-
-          <Divider variant="inset" component="li" />
-        </>
-      );
-    } else {
-      return (
-        <>
-          <ListItem alignItems="flex-start">
-            <ListItemAvatar>
-              <Avatar alt={theUsername} src="/static/images/avatar/1.jpg" />
-            </ListItemAvatar>
-            <ListItemText primary={theUsername} secondary={<React.Fragment>{props.message.messageContent}</React.Fragment>} />
-          </ListItem>
-        </>
-      );
-    }
+  if (props.id === props.messages.length) {
+    return (
+      <ListItem alignItems="flex-start">
+        <ListItemAvatar>
+          <Avatar alt={username} src={pfpBlob} />
+        </ListItemAvatar>
+        <ListItemText primary={username} secondary={<React.Fragment>{props.thisMessage.messageContent}</React.Fragment>} />
+      </ListItem>
+    );
   } else {
-    return "";
+    return (
+      <>
+        <ListItem alignItems="flex-start">
+          <ListItemAvatar>
+            <Avatar alt={username} src={pfpBlob} />
+          </ListItemAvatar>
+          <ListItemText primary={username} secondary={<React.Fragment>{props.thisMessage.messageContent}</React.Fragment>} />
+        </ListItem>
+
+        <Divider variant="inset" component="li" />
+      </>
+    );
   }
 }
 
-function CurrentChannelTab(props) {
-  const [messages, setMessages] = React.useState([]);
+class CurrentChannelTabPog extends React.Component {
+  constructor(props) {
+    super(props);
 
-  const subToUsername = (friendId, callback) => {
-    if (!props.usernameMap.hasOwnProperty(friendId)) {
-      props.database
-        .collection("users")
-        .doc(friendId)
-        .onSnapshot((snapshot) => {
-          if (snapshot.exists && snapshot.data().username !== props.usernameMap[friendId]) {
-            if (props.channelName === props.usernameMap[friendId]) {
-              props.setChannelName(snapshot.data().username);
-            }
+    this.state = {};
+    this.state.currentChannelId = "Region";
+    this.state.currentChannelName = "Region";
+    this.state.channelMessages = { Region: [] };
+  }
 
-            let oldUsernameMap = props.usernameMap;
-            oldUsernameMap[friendId] = snapshot.data().username;
-            props.setUsernameMap(oldUsernameMap);
-            callback(snapshot.data().username);
+  componentDidMount() {
+    this.props.database
+      .collection("chatChannels")
+      .doc("Region")
+      .onSnapshot((snapshotChat) => {
+        if (snapshotChat.exists) {
+          let oldChannelMessages = this.state.channelMessages;
+          if (document.getElementsByClassName("CurrentChannel-ChatList")[0] !== undefined) {
+            oldChannelMessages["Region"] = snapshotChat.data().messages;
           }
-        });
-    } else {
-      callback(props.usernameMap[friendId]);
-    }
+          this.setState({ channelMessages: oldChannelMessages });
+          document.getElementsByClassName("CurrentChannel-ChatList")[0].scrollTop = document.getElementsByClassName("CurrentChannel-ChatList")[0].scrollHeight;
+        }
+      });
+  }
+
+  setChannelScrollBottom = () => {
+    let scrollMessages = document.getElementsByClassName("CurrentChannel-ChatList")[0];
   };
 
-  const sendMessage = () => {
-    let inputBox = document.getElementById("InputBox");
-    props.database
+  setMessagesInitial = (channelId) => {
+    this.props.database
       .collection("chatChannels")
-      .doc(props.currentChannel)
-      .get()
-      .then((docSnapshot) => {
-        if (docSnapshot.exists) {
-          let oldMessages = docSnapshot.data().messages;
-          oldMessages.push({ sender: props.user.uid, messageContent: inputBox.value, channel: props.currentChannel });
-          props.database
-            .collection("chatChannels")
-            .doc(props.currentChannel)
-            .update({
-              messages: oldMessages,
-            })
-            .then(() => {
-              console.log(`Successfully sent message.`);
-              inputBox.value = "";
-            })
-            .catch((error) => {
-              console.error("Error sending message", error);
-            });
+      .doc(channelId)
+      .onSnapshot((snapshotChat) => {
+        if (snapshotChat.exists) {
+          let oldChannelMessages = this.state.channelMessages;
+          if (document.getElementsByClassName("CurrentChannel-ChatList")[0] !== undefined) {
+            oldChannelMessages[channelId] = snapshotChat.data().messages;
+          }
+          this.setState({ channelMessages: oldChannelMessages });
         }
       });
   };
 
-  return (
-    <div className="CurrentChannel-Content">
-      <div className="CurrentChannel-Chat">
-        <Paper className="CurrentChannel-ChatPaper" variant="outlined">
-          <ListSubheader component="div">Channel History: ({props.channelName})</ListSubheader>
-          <Divider />
-          <div className="CurrentChannel-ChatWindow">
-            <List className="CurrentChannel-ChatList">
-              {messages.map((message, id) => {
-                return <Message subToUsername={subToUsername} key={id} message={message} {...props} />;
-              })}
-            </List>
-            <Paper className="CurrentChannel-ChatInput" variant="outlined">
-              <IconButton className="CurrentChannel-AddButton" color="secondary">
-                <AddIcon />
-              </IconButton>
-              <TextField id="InputBox" size="small" placeholder="Message" className="CurrentChannel-ChatTextField" color="secondary" fullWidth />
-              <IconButton className="CurrentChannel-SendButton" color="secondary" onClick={sendMessage}>
-                <SendIcon />
-              </IconButton>
-            </Paper>
-          </div>
-        </Paper>
-      </div>
-      <div className="CurrentChannel-RightBar">
-        <Paper className="CurrentChannel-SearchPaper" variant="outlined">
-          <ListSubheader component="div">{`Channel Search`}</ListSubheader>
-          <Divider />
-          <div className="CurrentChannel-SearchContent">
-            <TextField
-              label="Search"
-              color="secondary"
-              fullWidth
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton className="CurrentChannel-SearchButton">
-                      <SearchIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </div>
-        </Paper>
-        <Paper className="CurrentChannel-SelectPaper" variant="outlined">
-          <ListSubheader component="div">{`Channel Select`}</ListSubheader>
-          <Divider />
-          <List>
-            <Channels setMessages={setMessages} subToUsername={subToUsername} {...props} />
-          </List>
-        </Paper>
-      </div>
-    </div>
-  );
-}
+  setCurrentChannel = (newChannelId) => {
+    let userId;
+    if (newChannelId.includes(" - ")) {
+      userId = newChannelId.split(" - ");
+      if (userId[0] === this.props.user.uid) userId = userId[1];
+      else if (userId[1] === this.props.user.uid) userId = userId[0];
 
-export default CurrentChannelTab;
+      this.props.database
+        .collection("users")
+        .doc(userId)
+        .get()
+        .then((snapshot) => {
+          if (snapshot.exists) {
+            if (this.state.channelMessages.hasOwnProperty(newChannelId)) {
+              this.setState({ currentChannelId: newChannelId, currentChannelName: snapshot.data().username });
+            } else {
+              this.props.database
+                .collection("chatChannels")
+                .doc(newChannelId)
+                .get()
+                .then((snapshotChat) => {
+                  if (snapshotChat.exists) {
+                    this.setState({ currentChannelId: newChannelId, currentChannelName: snapshot.data().username });
+                    this.setMessagesInitial(newChannelId);
+                    document.getElementsByClassName("CurrentChannel-ChatList")[0].scrollTop = document.getElementsByClassName("CurrentChannel-ChatList")[0].scrollHeight;
+                  }
+                });
+            }
+          }
+        });
+    } else {
+      if (this.state.channelMessages.hasOwnProperty(newChannelId)) {
+        this.setState({ currentChannelId: newChannelId, currentChannelName: newChannelId });
+      } else {
+        this.props.database
+          .collection("chatChannels")
+          .doc(newChannelId)
+          .get()
+          .then((snapshotChat) => {
+            if (snapshotChat.exists) {
+              this.setState({ currentChannelId: newChannelId, currentChannelName: newChannelId });
+              this.setMessagesInitial(newChannelId);
+              document.getElementsByClassName("CurrentChannel-ChatList")[0].scrollTop = document.getElementsByClassName("CurrentChannel-ChatList")[0].scrollHeight;
+            }
+          });
+      }
+    }
+  };
+
+  sendMessage = (event) => {
+    event.preventDefault();
+    let inputBox = document.getElementById("InputBox");
+    if (inputBox.value.length <= 2000) {
+      this.props.database
+        .collection("chatChannels")
+        .doc(this.state.currentChannelId)
+        .get()
+        .then((snapshot) => {
+          if (snapshot.exists) {
+            let oldMessages = snapshot.data().messages;
+            oldMessages.push({ channel: this.state.currentChannelId, messageContent: inputBox.value, sender: this.props.user.uid });
+            this.props.database
+              .collection("chatChannels")
+              .doc(this.state.currentChannelId)
+              .update({
+                messages: oldMessages,
+              })
+              .then(() => {
+                console.log(`Successfully sent message.`);
+                inputBox.value = "";
+                document.getElementsByClassName("CurrentChannel-ChatList")[0].scrollTop = document.getElementsByClassName("CurrentChannel-ChatList")[0].scrollHeight;
+              });
+          }
+        });
+    }
+  };
+
+  render() {
+    return (
+      <div className="CurrentChannel-Content">
+        <div className="CurrentChannel-Chat">
+          <Paper className="CurrentChannel-ChatPaper" variant="outlined">
+            <ListSubheader component="div">Channel History: ({this.state.currentChannelName})</ListSubheader>
+            <Divider />
+            <div className="CurrentChannel-ChatWindow">
+              <List className="CurrentChannel-ChatList">
+                {this.state.channelMessages[this.state.currentChannelId] !== undefined &&
+                  this.state.channelMessages[this.state.currentChannelId].map((message, id) => {
+                    return <Message id={id} key={id} messages={this.state.channelMessages[this.state.currentChannelId]} thisMessage={message} {...this.props} />;
+                  })}
+              </List>
+              <Paper className="CurrentChannel-ChatInput" variant="outlined">
+                <IconButton className="CurrentChannel-AddButton" color="secondary">
+                  <AddIcon />
+                </IconButton>
+                <form noValidate autoComplete="off" className="CurrentChannel-ChatTextFieldContainer" onSubmit={this.sendMessage}>
+                  <TextField id="InputBox" size="small" placeholder="Message" className="CurrentChannel-ChatTextField" color="secondary" fullWidth />
+                </form>
+                <IconButton className="CurrentChannel-SendButton" color="secondary" onClick={this.sendMessage}>
+                  <SendIcon />
+                </IconButton>
+              </Paper>
+            </div>
+          </Paper>
+        </div>
+        <div className="CurrentChannel-RightBar">
+          <Paper className="CurrentChannel-SearchPaper" variant="outlined">
+            <ListSubheader component="div">{`Channel Search`}</ListSubheader>
+            <Divider />
+            <div className="CurrentChannel-SearchContent">
+              <TextField
+                label="Search"
+                color="secondary"
+                fullWidth
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton className="CurrentChannel-SearchButton">
+                        <SearchIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </div>
+          </Paper>
+          <Paper className="CurrentChannel-SelectPaper" variant="outlined">
+            <ListSubheader component="div">{`Channel Select`}</ListSubheader>
+            <Divider />
+            <List>
+              <Channels setCurrentChannel={this.setCurrentChannel} currentChannelId={this.state.currentChannelId} {...this.props} />
+            </List>
+          </Paper>
+        </div>
+      </div>
+    );
+  }
+}
+export default CurrentChannelTabPog;

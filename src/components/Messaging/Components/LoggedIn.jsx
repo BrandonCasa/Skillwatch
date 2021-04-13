@@ -17,13 +17,10 @@ import CurrentChannelTab from "../../CurrentChannel/Components/CurrentChannelTab
 import FriendListTab from "../../Friends/Components/FriendListTab";
 
 function LoggedIn(props) {
-  const [currentChannel, setCurrentChannel] = React.useState("Region");
-  const [channelName, setChannelName] = React.useState("Region");
   const [currentTab, setCurrentTab] = React.useState(0);
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
   const [snackbarText, setSnackbarText] = React.useState("");
   const [friends, setFriends] = React.useState([]);
-  const [usernameMap, setUsernameMap] = React.useState({});
 
   const changeTab = (event, newValue) => {
     setCurrentTab(newValue);
@@ -37,23 +34,9 @@ function LoggedIn(props) {
   const currentTabContent = (props) => {
     switch (currentTab) {
     case 0:
-      return (
-        <CurrentChannelTab
-          channelName={channelName}
-          setChannelName={setChannelName}
-          usernameMap={usernameMap}
-          setUsernameMap={setUsernameMap}
-          setSnackbarOpen={setSnackbarOpen}
-          setSnackbarText={setSnackbarText}
-          setFriends={setFriends}
-          currentChannel={currentChannel}
-          setCurrentChannel={setCurrentChannel}
-          friends={friends}
-          {...props}
-        />
-      );
+      return <CurrentChannelTab setSnackbarOpen={setSnackbarOpen} setSnackbarText={setSnackbarText} setFriends={setFriends} friends={friends} {...props} />;
     case 1:
-      return <FriendListTab usernameMap={usernameMap} setUsernameMap={setUsernameMap} setSnackbarOpen={setSnackbarOpen} setSnackbarText={setSnackbarText} setFriends={setFriends} friends={friends} {...props} />;
+      return <FriendListTab setSnackbarOpen={setSnackbarOpen} setSnackbarText={setSnackbarText} setFriends={setFriends} friends={friends} {...props} />;
     case 2:
       return "Blocked List";
     default:
