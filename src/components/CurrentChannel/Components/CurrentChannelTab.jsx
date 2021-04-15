@@ -130,36 +130,17 @@ class CurrentChannelTabPog extends React.Component {
 
     this.state = {};
     this.state.mountedChat = false;
-    this.state.messageHeight = 0;
+    this.state.messageHeight = 999999;
+    this.state.messagesAdd = 0;
     this.state.currentChannelId = "Region";
     this.state.currentChannelName = "Region";
     this.state.channelMessages = { Region: [] };
     this.state.loadedChannels = [];
   }
-  componentDidUpdate() {
-    if (document.getElementById("CurrentChannel-ChatScroll") !== null) {
-      let height = document.getElementById("CurrentChannel-ChatScroll").clientHeight;
-      this.setState({ messageHeight: height });
-    }
-  }
+  componentDidUpdate() {}
 
   componentDidMount() {
-    this.props.database
-      .collection("chatChannels")
-      .doc("Region")
-      .onSnapshot((snapshotChat) => {
-        if (snapshotChat.exists) {
-          let oldChannelMessages = this.state.channelMessages;
-          if (document.getElementsByClassName("CurrentChannel-ChatList")[0] !== undefined) {
-            oldChannelMessages["Region"] = snapshotChat.data().messages;
-          }
-          this.setState({ channelMessages: oldChannelMessages });
-          if (!this.state.mountedChat) {
-            this.chatScrollbar.current.scrollToBottom();
-            this.setState({ mountedChat: true });
-          }
-        }
-      });
+    this.setMessagesInitial("Region");
   }
 
   setMessagesInitial = (channelId) => {
@@ -174,10 +155,18 @@ class CurrentChannelTabPog extends React.Component {
           }
           let loadedChannels = this.state.loadedChannels;
           this.setState({ channelMessages: oldChannelMessages });
+          if (!this.state.mountedChat) {
+            this.chatScrollbar.current.scrollToBottom();
+            this.setState({ mountedChat: true });
+          }
           if (!loadedChannels.includes(channelId)) {
             loadedChannels.push(channelId);
             this.setState({ loadedChannels: loadedChannels });
             this.chatScrollbar.current.scrollToBottom();
+          }
+          if (document.getElementById("scrollable") !== null) {
+            let height = document.getElementById("scrollable").clientHeight;
+            this.setState({ messageHeight: height });
           }
         }
       });
@@ -274,7 +263,6 @@ class CurrentChannelTabPog extends React.Component {
               .then(() => {
                 console.log(`Successfully sent message.`);
                 inputBox.value = "";
-                console.log(this.chatScrollbar.current.getScrollTop(), this.chatScrollbar.current.getScrollHeight());
                 if (shouldScroll) {
                   this.chatScrollbar.current.scrollToBottom();
                 } else {
@@ -283,6 +271,14 @@ class CurrentChannelTabPog extends React.Component {
               });
           }
         });
+    }
+  };
+
+  handleScroll = () => {
+    if (this.chatScrollbar.current.getScrollTop() === 0) {
+      let newMessagesAdd = this.state.messagesAdd + this.state.messageHeight / 73;
+      this.setState({ messagesAdd: newMessagesAdd });
+      this.chatScrollbar.current.scrollTop(73);
     }
   };
 
@@ -299,7 +295,7 @@ class CurrentChannelTabPog extends React.Component {
               <Scrollbars className="CurrentChannel-ChatScroll" onScroll={this.handleScroll} ref={this.chatScrollbar} id="scrollable">
                 <List className="CurrentChannel-ChatList">
                   {reversedChat !== undefined &&
-                    reversedChat.map((message, id) => {
+                    reversedChat.slice((this.state.messageHeight / 73) * -1 - 1 - this.state.messagesAdd).map((message, id) => {
                       return <Message id={id} key={id} messages={reversedChat} thisMessage={message} {...this.props} />;
                     })}
                 </List>
