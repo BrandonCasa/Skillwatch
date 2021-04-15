@@ -134,6 +134,7 @@ class CurrentChannelTabPog extends React.Component {
     this.state.currentChannelId = "Region";
     this.state.currentChannelName = "Region";
     this.state.channelMessages = { Region: [] };
+    this.state.loadedChannels = [];
   }
   componentDidUpdate() {
     if (document.getElementById("CurrentChannel-ChatScroll") !== null) {
@@ -171,7 +172,13 @@ class CurrentChannelTabPog extends React.Component {
           if (document.getElementsByClassName("CurrentChannel-ChatList")[0] !== undefined) {
             oldChannelMessages[channelId] = snapshotChat.data().messages;
           }
+          let loadedChannels = this.state.loadedChannels;
           this.setState({ channelMessages: oldChannelMessages });
+          if (!loadedChannels.includes(channelId)) {
+            loadedChannels.push(channelId);
+            this.setState({ loadedChannels: loadedChannels });
+            this.chatScrollbar.current.scrollToBottom();
+          }
         }
       });
   };
@@ -191,6 +198,7 @@ class CurrentChannelTabPog extends React.Component {
           if (snapshot.exists) {
             if (this.state.channelMessages.hasOwnProperty(newChannelId)) {
               this.setState({ currentChannelId: newChannelId, currentChannelName: snapshot.data().username });
+              this.chatScrollbar.current.scrollToBottom();
             } else {
               this.props.database
                 .collection("chatChannels")
@@ -208,7 +216,20 @@ class CurrentChannelTabPog extends React.Component {
         });
     } else {
       if (this.state.channelMessages.hasOwnProperty(newChannelId)) {
-        this.setState({ currentChannelId: newChannelId, currentChannelName: newChannelId });
+        this.props.database
+          .collection("chatChannels")
+          .doc(newChannelId)
+          .get()
+          .then((snapshotChat) => {
+            if (snapshotChat.exists) {
+              let oldChannelMessages = this.state.channelMessages;
+              if (document.getElementsByClassName("CurrentChannel-ChatList")[0] !== undefined) {
+                oldChannelMessages[newChannelId] = snapshotChat.data().messages;
+              }
+              this.setState({ currentChannelId: newChannelId, currentChannelName: newChannelId, channelMessages: oldChannelMessages });
+              this.chatScrollbar.current.scrollToBottom();
+            }
+          });
       } else {
         this.props.database
           .collection("chatChannels")
