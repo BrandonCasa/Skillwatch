@@ -173,6 +173,7 @@ class CurrentChannelTabPog extends React.Component {
   };
 
   setCurrentChannel = (newChannelId) => {
+    this.setState({ messagesAdd: 0 });
     let userId;
     if (newChannelId.includes(" - ")) {
       userId = newChannelId.split(" - ");
@@ -276,9 +277,9 @@ class CurrentChannelTabPog extends React.Component {
 
   handleScroll = () => {
     if (this.chatScrollbar.current.getScrollTop() === 0) {
-      let newMessagesAdd = this.state.messagesAdd + this.state.messageHeight / 73;
+      let newMessagesAdd = this.state.messagesAdd + this.state.messageHeight / 73 / 3;
       this.setState({ messagesAdd: newMessagesAdd });
-      this.chatScrollbar.current.scrollTop(73);
+      this.chatScrollbar.current.scrollTop(this.state.messageHeight / 73);
     }
   };
 
