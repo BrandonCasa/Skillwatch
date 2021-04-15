@@ -17,12 +17,14 @@ import ListItemText from "@material-ui/core/ListItemText";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import Avatar from "@material-ui/core/Avatar";
 import Typography from "@material-ui/core/Typography";
+import { Scrollbars } from "react-custom-scrollbars";
 
 // SCSS
 import "./CurrentChannelTab.scss";
 // Custom Components
 import FriendChannel from "./FriendChannel";
 import PublicChannel from "./PublicChannel";
+import CustomScrollbar from "./CustomScrollbar";
 
 function Channels(props) {
   const onClickFriend = (event, friendId) => {
@@ -122,13 +124,22 @@ function Message(props) {
 }
 
 class CurrentChannelTabPog extends React.Component {
+  chatScrollbar = React.createRef();
   constructor(props) {
     super(props);
 
     this.state = {};
+    this.state.mountedChat = false;
+    this.state.messageHeight = 0;
     this.state.currentChannelId = "Region";
     this.state.currentChannelName = "Region";
     this.state.channelMessages = { Region: [] };
+  }
+  componentDidUpdate() {
+    if (document.getElementById("CurrentChannel-ChatScroll") !== null) {
+      let height = document.getElementById("CurrentChannel-ChatScroll").clientHeight;
+      this.setState({ messageHeight: height });
+    }
   }
 
   componentDidMount() {
@@ -142,14 +153,13 @@ class CurrentChannelTabPog extends React.Component {
             oldChannelMessages["Region"] = snapshotChat.data().messages;
           }
           this.setState({ channelMessages: oldChannelMessages });
-          document.getElementsByClassName("CurrentChannel-ChatList")[0].scrollTop = document.getElementsByClassName("CurrentChannel-ChatList")[0].scrollHeight;
+          if (!this.state.mountedChat) {
+            this.chatScrollbar.current.scrollToBottom();
+            this.setState({ mountedChat: true });
+          }
         }
       });
   }
-
-  setChannelScrollBottom = () => {
-    let scrollMessages = document.getElementsByClassName("CurrentChannel-ChatList")[0];
-  };
 
   setMessagesInitial = (channelId) => {
     this.props.database
@@ -190,7 +200,7 @@ class CurrentChannelTabPog extends React.Component {
                   if (snapshotChat.exists) {
                     this.setState({ currentChannelId: newChannelId, currentChannelName: snapshot.data().username });
                     this.setMessagesInitial(newChannelId);
-                    document.getElementsByClassName("CurrentChannel-ChatList")[0].scrollTop = document.getElementsByClassName("CurrentChannel-ChatList")[0].scrollHeight;
+                    this.chatScrollbar.current.scrollToBottom();
                   }
                 });
             }
@@ -208,7 +218,7 @@ class CurrentChannelTabPog extends React.Component {
             if (snapshotChat.exists) {
               this.setState({ currentChannelId: newChannelId, currentChannelName: newChannelId });
               this.setMessagesInitial(newChannelId);
-              document.getElementsByClassName("CurrentChannel-ChatList")[0].scrollTop = document.getElementsByClassName("CurrentChannel-ChatList")[0].scrollHeight;
+              this.chatScrollbar.current.scrollToBottom();
             }
           });
       }
@@ -217,6 +227,13 @@ class CurrentChannelTabPog extends React.Component {
 
   sendMessage = (event) => {
     event.preventDefault();
+
+    let shouldScroll = false;
+    let oldScroll = this.chatScrollbar.current.getScrollTop();
+    if ((this.chatScrollbar.current.getScrollHeight() - this.chatScrollbar.current.getScrollTop()) / 73 < 15) {
+      shouldScroll = true;
+    }
+
     let inputBox = document.getElementById("InputBox");
     if (inputBox.value.length <= 2000) {
       this.props.database
@@ -236,7 +253,12 @@ class CurrentChannelTabPog extends React.Component {
               .then(() => {
                 console.log(`Successfully sent message.`);
                 inputBox.value = "";
-                document.getElementsByClassName("CurrentChannel-ChatList")[0].scrollTop = document.getElementsByClassName("CurrentChannel-ChatList")[0].scrollHeight;
+                console.log(this.chatScrollbar.current.getScrollTop(), this.chatScrollbar.current.getScrollHeight());
+                if (shouldScroll) {
+                  this.chatScrollbar.current.scrollToBottom();
+                } else {
+                  this.chatScrollbar.current.scrollTop = oldScroll;
+                }
               });
           }
         });
@@ -244,6 +266,8 @@ class CurrentChannelTabPog extends React.Component {
   };
 
   render() {
+    let reversedChat = this.state.channelMessages[this.state.currentChannelId];
+    //if (reversedChat !== undefined) reversedChat = reversedChat.reverse();
     return (
       <div className="CurrentChannel-Content">
         <div className="CurrentChannel-Chat">
@@ -251,12 +275,14 @@ class CurrentChannelTabPog extends React.Component {
             <ListSubheader component="div">Channel History: ({this.state.currentChannelName})</ListSubheader>
             <Divider />
             <div className="CurrentChannel-ChatWindow">
-              <List className="CurrentChannel-ChatList">
-                {this.state.channelMessages[this.state.currentChannelId] !== undefined &&
-                  this.state.channelMessages[this.state.currentChannelId].map((message, id) => {
-                    return <Message id={id} key={id} messages={this.state.channelMessages[this.state.currentChannelId]} thisMessage={message} {...this.props} />;
-                  })}
-              </List>
+              <Scrollbars className="CurrentChannel-ChatScroll" onScroll={this.handleScroll} ref={this.chatScrollbar} id="scrollable">
+                <List className="CurrentChannel-ChatList">
+                  {reversedChat !== undefined &&
+                    reversedChat.map((message, id) => {
+                      return <Message id={id} key={id} messages={reversedChat} thisMessage={message} {...this.props} />;
+                    })}
+                </List>
+              </Scrollbars>
               <Paper className="CurrentChannel-ChatInput" variant="outlined">
                 <IconButton className="CurrentChannel-AddButton" color="secondary">
                   <AddIcon />

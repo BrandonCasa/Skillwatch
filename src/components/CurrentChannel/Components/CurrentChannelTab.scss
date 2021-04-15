@@ -56,10 +56,15 @@
           }
         }
 
-        .CurrentChannel-ChatList {
-          overflow-y: scroll !important;
-          flex-grow: 1;
-          padding: 8px;
+        .CurrentChannel-ChatScroll {
+          .CurrentChannel-ChatList {
+            overflow-y: scroll !important;
+            flex-grow: 1;
+            padding: 8px;
+          }
+        }
+        .CurrentChannel-ChatList::-webkit-scrollbar {
+          display: none;
         }
       }
     }
