@@ -274,7 +274,6 @@ export const messaging = {
               });
           } else {
             dispatch.messaging.setCurrentChannelIdName({ newId: payload.newId, newName: payload.newId });
-            console.log("e");
             payload.callback();
           }
         }
