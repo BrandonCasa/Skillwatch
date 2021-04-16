@@ -48,9 +48,10 @@ export const snackbar = {
 };
 
 const defaultMessaging = {
-  currentChannelId: "Region",
-  currentChannelName: "Region",
+  currentChannelId: "none",
+  currentChannelName: "none",
   savedUsernames: {},
+  messages: { none: [] },
 };
 
 export const messaging = {
@@ -65,7 +66,7 @@ export const messaging = {
       };
     },
     saveUsername(state, payload) {
-      let oldSavedUsernames = state.savedUsernames;
+      let oldSavedUsernames = { ...state.savedUsernames };
       oldSavedUsernames[payload.userId] = payload.userName;
 
       return {
@@ -73,25 +74,97 @@ export const messaging = {
         savedUsernames: oldSavedUsernames,
       };
     },
+    setMessages(state, payload) {
+      let oldMessages = { ...state.messages };
+      oldMessages[payload.channelId] = payload.newMessages;
+
+      return {
+        ...state,
+        messages: oldMessages,
+      };
+    },
   },
   effects: (dispatch) => {
     return {
       setCurrentChannelId(payload, state) {
         if (payload.newId.length === 28) {
-          payload.database
-            .collection("users")
-            .doc(payload.newId)
-            .get()
-            .then((snapshot) => {
-              dispatch.messaging.saveUsername({ userId: payload.newId, userName: snapshot.data().username });
-              dispatch.messaging.setCurrentChannelIdName({ newId: payload.newId, newName: snapshot.data().username });
-            });
           if (!state.messaging.savedUsernames.hasOwnProperty(payload.newId)) {
             payload.database
               .collection("users")
               .doc(payload.newId)
               .onSnapshot((snapshot) => {
                 dispatch.messaging.saveUsername({ userId: payload.newId, userName: snapshot.data().username });
+              });
+            let docRefA = payload.database.collection("chatChannels").doc(`${payload.user.uid} - ${payload.newId}`);
+            let docRefB = payload.database.collection("chatChannels").doc(`${payload.newId} - ${payload.user.uid}`);
+            docRefA.get().then((docA) => {
+              if (docA.exists) {
+                // If `${props.user.uid} - ${friendId}` DOES exist
+                payload.database
+                  .collection("chatChannels")
+                  .doc(`${payload.user.uid} - ${payload.newId}`)
+                  .get()
+                  .then((chatSnapshot) => {
+                    dispatch.messaging.setMessages({ channelId: payload.newId, newMessages: chatSnapshot.data().messages });
+                    dispatch.messaging.setCurrentChannelIdName({ newId: payload.newId, newName: payload.newId });
+                    payload.callback();
+                  });
+                payload.database
+                  .collection("chatChannels")
+                  .doc(`${payload.user.uid} - ${payload.newId}`)
+                  .onSnapshot((chatSnapshot) => {
+                    dispatch.messaging.setMessages({ channelId: payload.newId, newMessages: chatSnapshot.data().messages });
+                  });
+              } else {
+                // If `${props.user.uid} - ${friendId}` DOES NOT exist
+                docRefB.get().then((docB) => {
+                  if (docB.exists) {
+                    // If `${friendId} - ${props.user.uid}` DOES exist
+                    payload.database
+                      .collection("chatChannels")
+                      .doc(`${payload.newId} - ${payload.user.uid}`)
+                      .get()
+                      .then((chatSnapshot) => {
+                        dispatch.messaging.setMessages({ channelId: payload.newId, newMessages: chatSnapshot.data().messages });
+                        dispatch.messaging.setCurrentChannelIdName({ newId: payload.newId, newName: payload.newId });
+                        payload.callback();
+                      });
+                    payload.database
+                      .collection("chatChannels")
+                      .doc(`${payload.newId} - ${payload.user.uid}`)
+                      .onSnapshot((chatSnapshot) => {
+                        dispatch.messaging.setMessages({ channelId: payload.newId, newMessages: chatSnapshot.data().messages });
+                      });
+                  } else {
+                    // If `${friendId} - ${props.user.uid}` DOES NOT exist
+                    payload.database.collection("chatChannels").doc(`${payload.user.uid} - ${payload.newId}`).set({ messages: [] });
+                    payload.database
+                      .collection("chatChannels")
+                      .doc(`${payload.user.uid} - ${payload.newId}`)
+                      .get()
+                      .then((chatSnapshot) => {
+                        dispatch.messaging.setMessages({ channelId: payload.newId, newMessages: chatSnapshot.data().messages });
+                        dispatch.messaging.setCurrentChannelIdName({ newId: payload.newId, newName: payload.newId });
+                        payload.callback();
+                      });
+                    payload.database
+                      .collection("chatChannels")
+                      .doc(`${payload.user.uid} - ${payload.newId}`)
+                      .onSnapshot((chatSnapshot) => {
+                        dispatch.messaging.setMessages({ channelId: payload.newId, newMessages: chatSnapshot.data().messages });
+                      });
+                  }
+                });
+              }
+            });
+          } else {
+            payload.database
+              .collection("users")
+              .doc(payload.newId)
+              .get()
+              .then((snapshot) => {
+                dispatch.messaging.setCurrentChannelIdName({ newId: payload.newId, newName: state.messaging.savedUsernames[payload.newId] });
+                payload.callback();
               });
           }
         } else if (payload.newId.length === 59) {
@@ -102,14 +175,6 @@ export const messaging = {
             theId = theId.split(" - ")[0];
           }
 
-          payload.database
-            .collection("users")
-            .doc(theId)
-            .get()
-            .then((snapshot) => {
-              dispatch.messaging.saveUsername({ userId: theId, userName: snapshot.data().username });
-              dispatch.messaging.setCurrentChannelIdName({ newId: theId, newName: snapshot.data().username });
-            });
           if (!state.messaging.savedUsernames.hasOwnProperty(theId)) {
             payload.database
               .collection("users")
@@ -117,10 +182,101 @@ export const messaging = {
               .onSnapshot((snapshot) => {
                 dispatch.messaging.saveUsername({ userId: theId, userName: snapshot.data().username });
               });
+            let docRefA = payload.database.collection("chatChannels").doc(`${payload.user.uid} - ${theId}`);
+            let docRefB = payload.database.collection("chatChannels").doc(`${theId} - ${payload.user.uid}`);
+            docRefA.get().then((docA) => {
+              if (docA.exists) {
+                // If `${props.user.uid} - ${friendId}` DOES exist
+                payload.database
+                  .collection("chatChannels")
+                  .doc(`${payload.user.uid} - ${theId}`)
+                  .get()
+                  .then((chatSnapshot) => {
+                    dispatch.messaging.setMessages({ channelId: theId, newMessages: chatSnapshot.data().messages });
+                    dispatch.messaging.setCurrentChannelIdName({ newId: theId, newName: theId });
+                    payload.callback();
+                  });
+                payload.database
+                  .collection("chatChannels")
+                  .doc(`${payload.user.uid} - ${theId}`)
+                  .onSnapshot((chatSnapshot) => {
+                    dispatch.messaging.setMessages({ channelId: theId, newMessages: chatSnapshot.data().messages });
+                  });
+              } else {
+                // If `${props.user.uid} - ${friendId}` DOES NOT exist
+                docRefB.get().then((docB) => {
+                  if (docB.exists) {
+                    // If `${friendId} - ${props.user.uid}` DOES exist
+                    payload.database
+                      .collection("chatChannels")
+                      .doc(`${theId} - ${payload.user.uid}`)
+                      .get()
+                      .then((chatSnapshot) => {
+                        dispatch.messaging.setMessages({ channelId: theId, newMessages: chatSnapshot.data().messages });
+                        dispatch.messaging.setCurrentChannelIdName({ newId: theId, newName: theId });
+                        payload.callback();
+                      });
+                    payload.database
+                      .collection("chatChannels")
+                      .doc(`${theId} - ${payload.user.uid}`)
+                      .onSnapshot((chatSnapshot) => {
+                        dispatch.messaging.setMessages({ channelId: theId, newMessages: chatSnapshot.data().messages });
+                      });
+                  } else {
+                    // If `${friendId} - ${props.user.uid}` DOES NOT exist
+                    payload.database.collection("chatChannels").doc(`${payload.user.uid} - ${theId}`).set({ messages: [] });
+                    payload.database
+                      .collection("chatChannels")
+                      .doc(`${payload.user.uid} - ${theId}`)
+                      .get()
+                      .then((chatSnapshot) => {
+                        dispatch.messaging.setMessages({ channelId: theId, newMessages: chatSnapshot.data().messages });
+                        dispatch.messaging.setCurrentChannelIdName({ newId: theId, newName: theId });
+                        payload.callback();
+                      });
+                    payload.database
+                      .collection("chatChannels")
+                      .doc(`${payload.user.uid} - ${theId}`)
+                      .onSnapshot((chatSnapshot) => {
+                        dispatch.messaging.setMessages({ channelId: theId, newMessages: chatSnapshot.data().messages });
+                      });
+                  }
+                });
+              }
+            });
+          } else {
+            payload.database
+              .collection("users")
+              .doc(theId)
+              .get()
+              .then((snapshot) => {
+                dispatch.messaging.setCurrentChannelIdName({ newId: theId, newName: state.messaging.savedUsernames[theId] });
+                payload.callback();
+              });
           }
         } else {
-          dispatch.messaging.saveUsername({ userId: payload.newId, userName: payload.newId });
-          dispatch.messaging.setCurrentChannelIdName({ newId: payload.newId, newName: payload.newId });
+          if (!state.messaging.savedUsernames.hasOwnProperty(payload.newId)) {
+            dispatch.messaging.saveUsername({ userId: payload.newId, userName: payload.newId });
+            payload.database
+              .collection("chatChannels")
+              .doc(payload.newId)
+              .get()
+              .then((chatSnapshot) => {
+                dispatch.messaging.setMessages({ channelId: payload.newId, newMessages: chatSnapshot.data().messages });
+                dispatch.messaging.setCurrentChannelIdName({ newId: payload.newId, newName: payload.newId });
+                payload.callback();
+              });
+            payload.database
+              .collection("chatChannels")
+              .doc(payload.newId)
+              .onSnapshot((chatSnapshot) => {
+                dispatch.messaging.setMessages({ channelId: payload.newId, newMessages: chatSnapshot.data().messages });
+              });
+          } else {
+            dispatch.messaging.setCurrentChannelIdName({ newId: payload.newId, newName: payload.newId });
+            console.log("e");
+            payload.callback();
+          }
         }
       },
     };
@@ -136,7 +292,6 @@ export const userInformation = {
   reducers: {
     // handle state changes with pure functions
     setLoggedIn(state, payload) {
-      console.log(payload);
       return {
         ...state,
         loggedIn: payload,
@@ -195,7 +350,7 @@ export const myProfile = {
       };
     },
     setColors(state, payload) {
-      let theColors = state.colors;
+      let theColors = { ...state.colors };
 
       if (payload.colors.hasOwnProperty("primary")) {
         if (payload.colors.primary.hasOwnProperty("light")) {

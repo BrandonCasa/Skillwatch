@@ -22,6 +22,7 @@ const mapDispatch = (dispatch) => ({
   setSnackbarText: (newText) => dispatch.snackbar.setSnackbarText(newText),
   setColors: (newColors) => dispatch.myProfile.setColors({ colors: newColors }),
   saveColors: (user, database) => dispatch.myProfile.saveColors({ user, database }),
+  setCurrentChannelId: (newId, user, database, callback) => dispatch.messaging.setCurrentChannelId({ newId, user, database, callback }),
 });
 
 const AppContainer = connect(mapState, mapDispatch)(App);

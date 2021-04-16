@@ -8,12 +8,13 @@ const mapState = (state) => ({
   friends: state.myProfile.friends,
   currentChannelId: state.messaging.currentChannelId,
   currentChannelName: state.messaging.currentChannelName,
+  messages: state.messaging.messages,
 });
 
 const mapDispatch = (dispatch) => ({
   setPrimaryDrawerOpen: (newDrawerOpen) => dispatch.primaryDrawerOpen.setPrimaryDrawerOpen(newDrawerOpen),
   setLoggedIn: (newLoggedIn) => dispatch.userInformation.setLoggedIn(newLoggedIn),
-  setCurrentChannelId: (newId, user, database) => dispatch.messaging.setCurrentChannelId({ newId, user, database }),
+  setCurrentChannelId: (newId, user, database, callback) => dispatch.messaging.setCurrentChannelId({ newId, user, database, callback }),
 });
 
 const MessagingContainer = connect(mapState, mapDispatch)(Messaging);

@@ -34,24 +34,41 @@ function Channels(props) {
     docRefA.get().then((docA) => {
       if (docA.exists) {
         // If `${props.user.uid} - ${friendId}` DOES exist
-        props.setCurrentChannelId(`${props.user.uid} - ${friendId}`, props.user, props.database);
+        props.setCurrentChannelId(`${props.user.uid} - ${friendId}`, props.user, props.database, () => {
+          setTimeout(() => {
+            props.chatScrollbar.current.scrollToBottom();
+          }, 200);
+        });
       } else {
         // If `${props.user.uid} - ${friendId}` DOES NOT exist
         docRefB.get().then((docB) => {
           if (docB.exists) {
             // If `${friendId} - ${props.user.uid}` DOES exist
-            props.setCurrentChannelId(`${friendId} - ${props.user.uid}`, props.user, props.database);
+            props.setCurrentChannelId(`${friendId} - ${props.user.uid}`, props.user, props.database, () => {
+              setTimeout(() => {
+                props.chatScrollbar.current.scrollToBottom();
+              }, 200);
+            });
           } else {
             // If `${friendId} - ${props.user.uid}` DOES NOT exist
             props.database.collection("chatChannels").doc(`${props.user.uid} - ${friendId}`).set({ messages: [] });
-            props.setCurrentChannelId(`${props.user.uid} - ${friendId}`, props.user, props.database);
+            props.setCurrentChannelId(`${props.user.uid} - ${friendId}`, props.user, props.database, () => {
+              props.chatScrollbar.current.scrollToBottom();
+              setTimeout(() => {
+                props.chatScrollbar.current.scrollToBottom();
+              }, 200);
+            });
           }
         });
       }
     });
   };
   const onClickPublicChannel = (event, channelName) => {
-    props.setCurrentChannelId(channelName, props.user, props.database);
+    props.setCurrentChannelId(channelName, props.user, props.database, () => {
+      setTimeout(() => {
+        props.chatScrollbar.current.scrollToBottom();
+      }, 200);
+    });
   };
 
   return (
@@ -129,8 +146,13 @@ class CurrentChannelTabPog extends React.Component {
     super(props);
 
     this.state = {};
+    this.state.mounted = false;
   }
-  componentDidUpdate() {}
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps.currentChannelId !== this.props.currentChannelId) {
+      this.chatScrollbar.current.scrollToBottom();
+    }
+  }
 
   componentDidMount() {}
 
@@ -140,6 +162,110 @@ class CurrentChannelTabPog extends React.Component {
 
   sendMessage = (event) => {
     event.preventDefault();
+
+    let inputBox = document.getElementById("InputBox");
+    if (inputBox.value.length <= 2000 && inputBox.value.replaceAll(" ", "").length !== 0) {
+      let docRefA = this.props.database.collection("chatChannels").doc(`${this.props.user.uid} - ${this.props.currentChannelId}`);
+      let docRefB = this.props.database.collection("chatChannels").doc(`${this.props.currentChannelId} - ${this.props.user.uid}`);
+      if (this.props.currentChannelId.length !== 28) {
+        this.props.database
+          .collection("chatChannels")
+          .doc(this.props.currentChannelId)
+          .get()
+          .then((snapshot) => {
+            if (snapshot.exists) {
+              let oldMessages = snapshot.data().messages;
+              oldMessages.push({ channel: this.props.currentChannelId, messageContent: inputBox.value, sender: this.props.user.uid });
+              this.props.database
+                .collection("chatChannels")
+                .doc(this.props.currentChannelId)
+                .update({
+                  messages: oldMessages,
+                })
+                .then(() => {
+                  console.log(`Successfully sent message.`);
+                  inputBox.value = "";
+                });
+            }
+          });
+      } else {
+        docRefA.get().then((docA) => {
+          if (docA.exists) {
+            // If `${props.user.uid} - ${friendId}` DOES exist
+            this.props.database
+              .collection("chatChannels")
+              .doc(`${this.props.user.uid} - ${this.props.currentChannelId}`)
+              .get()
+              .then((snapshot) => {
+                if (snapshot.exists) {
+                  let oldMessages = snapshot.data().messages;
+                  oldMessages.push({ channel: this.props.currentChannelId, messageContent: inputBox.value, sender: this.props.user.uid });
+                  this.props.database
+                    .collection("chatChannels")
+                    .doc(`${this.props.user.uid} - ${this.props.currentChannelId}`)
+                    .update({
+                      messages: oldMessages,
+                    })
+                    .then(() => {
+                      console.log(`Successfully sent message.`);
+                      inputBox.value = "";
+                    });
+                }
+              });
+          } else {
+            // If `${props.user.uid} - ${friendId}` DOES NOT exist
+            docRefB.get().then((docB) => {
+              if (docB.exists) {
+                // If `${friendId} - ${props.user.uid}` DOES exist
+                this.props.database
+                  .collection("chatChannels")
+                  .doc(`${this.props.currentChannelId} - ${this.props.user.uid}`)
+                  .get()
+                  .then((snapshot) => {
+                    if (snapshot.exists) {
+                      let oldMessages = snapshot.data().messages;
+                      oldMessages.push({ channel: this.props.currentChannelId, messageContent: inputBox.value, sender: this.props.user.uid });
+                      this.props.database
+                        .collection("chatChannels")
+                        .doc(`${this.props.currentChannelId} - ${this.props.user.uid}`)
+                        .update({
+                          messages: oldMessages,
+                        })
+                        .then(() => {
+                          console.log(`Successfully sent message.`);
+                          inputBox.value = "";
+                        });
+                    }
+                  });
+              } else {
+                // If `${friendId} - ${props.user.uid}` DOES NOT exist
+                this.props.database.collection("chatChannels").doc(`${this.props.user.uid} - ${this.props.currentChannelId}`).set({ messages: [] });
+                this.props.database
+                  .collection("chatChannels")
+                  .doc(`${this.props.user.uid} - ${this.props.currentChannelId}`)
+                  .get()
+                  .then((snapshot) => {
+                    if (snapshot.exists) {
+                      let oldMessages = snapshot.data().messages;
+                      oldMessages.push({ channel: this.props.currentChannelId, messageContent: inputBox.value, sender: this.props.user.uid });
+                      this.props.database
+                        .collection("chatChannels")
+                        .doc(`${this.props.user.uid} - ${this.props.currentChannelId}`)
+                        .update({
+                          messages: oldMessages,
+                        })
+                        .then(() => {
+                          console.log(`Successfully sent message.`);
+                          inputBox.value = "";
+                        });
+                    }
+                  });
+              }
+            });
+          }
+        });
+      }
+    }
   };
 
   handleScroll = () => {};
@@ -153,7 +279,11 @@ class CurrentChannelTabPog extends React.Component {
             <Divider />
             <div className="CurrentChannel-ChatWindow">
               <Scrollbars className="CurrentChannel-ChatScroll" onScroll={this.handleScroll} ref={this.chatScrollbar} id="scrollable">
-                <List className="CurrentChannel-ChatList"></List>
+                <List className="CurrentChannel-ChatList">
+                  {this.props.messages[this.props.currentChannelId].map((message, id) => {
+                    return <Message id={id} key={id} messages={this.props.messages[this.props.currentChannelId]} thisMessage={message} {...this.props} />;
+                  })}
+                </List>
               </Scrollbars>
               <Paper className="CurrentChannel-ChatInput" variant="outlined">
                 <IconButton className="CurrentChannel-AddButton" color="secondary">
@@ -194,7 +324,7 @@ class CurrentChannelTabPog extends React.Component {
             <ListSubheader component="div">{`Channel Select`}</ListSubheader>
             <Divider />
             <List>
-              <Channels currentChannelId={this.props.currentChannelId} {...this.props} />
+              <Channels chatScrollbar={this.chatScrollbar} currentChannelId={this.props.currentChannelId} {...this.props} />
             </List>
           </Paper>
         </div>

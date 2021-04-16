@@ -43,8 +43,6 @@ function LoggedIn(props) {
     }
   };
 
-  React.useEffect(() => {}, []);
-
   return (
     <>
       <AppBar position="static" className="LoggedIn-AppBar">

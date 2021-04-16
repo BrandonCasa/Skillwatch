@@ -471,6 +471,7 @@ function App(props) {
         checkUserExists();
 
         if (userSet === false) {
+          props.setCurrentChannelId("Region", user, db, () => {});
           props.awaitProfileChanges(user, db);
           setUserSet(true);
         }
