@@ -20,7 +20,6 @@ function LoggedIn(props) {
   const [currentTab, setCurrentTab] = React.useState(0);
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
   const [snackbarText, setSnackbarText] = React.useState("");
-  const [friends, setFriends] = React.useState([]);
 
   const changeTab = (event, newValue) => {
     setCurrentTab(newValue);
@@ -34,9 +33,9 @@ function LoggedIn(props) {
   const currentTabContent = (props) => {
     switch (currentTab) {
     case 0:
-      return <CurrentChannelTab setSnackbarOpen={setSnackbarOpen} setSnackbarText={setSnackbarText} setFriends={setFriends} friends={friends} {...props} />;
+      return <CurrentChannelTab setSnackbarOpen={setSnackbarOpen} setSnackbarText={setSnackbarText} {...props} />;
     case 1:
-      return <FriendListTab setSnackbarOpen={setSnackbarOpen} setSnackbarText={setSnackbarText} setFriends={setFriends} friends={friends} {...props} />;
+      return <FriendListTab setSnackbarOpen={setSnackbarOpen} setSnackbarText={setSnackbarText} {...props} />;
     case 2:
       return "Blocked List";
     default:
@@ -44,18 +43,7 @@ function LoggedIn(props) {
     }
   };
 
-  React.useEffect(() => {
-    props.database
-      .collection("users")
-      .doc(props.user.uid)
-      .onSnapshot((snapshot) => {
-        if (snapshot.exists) {
-          if (snapshot.data().hasOwnProperty("friends")) {
-            setFriends(snapshot.data().friends);
-          }
-        }
-      });
-  }, []);
+  React.useEffect(() => {}, []);
 
   return (
     <>

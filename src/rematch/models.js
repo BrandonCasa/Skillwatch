@@ -47,6 +47,86 @@ export const snackbar = {
   },
 };
 
+const defaultMessaging = {
+  currentChannelId: "Region",
+  currentChannelName: "Region",
+  savedUsernames: {},
+};
+
+export const messaging = {
+  state: defaultMessaging, // initial state
+  reducers: {
+    // handle state changes with pure functions
+    setCurrentChannelIdName(state, payload) {
+      return {
+        ...state,
+        currentChannelId: payload.newId,
+        currentChannelName: payload.newName,
+      };
+    },
+    saveUsername(state, payload) {
+      let oldSavedUsernames = state.savedUsernames;
+      oldSavedUsernames[payload.userId] = payload.userName;
+
+      return {
+        ...state,
+        savedUsernames: oldSavedUsernames,
+      };
+    },
+  },
+  effects: (dispatch) => {
+    return {
+      setCurrentChannelId(payload, state) {
+        if (payload.newId.length === 28) {
+          payload.database
+            .collection("users")
+            .doc(payload.newId)
+            .get()
+            .then((snapshot) => {
+              dispatch.messaging.saveUsername({ userId: payload.newId, userName: snapshot.data().username });
+              dispatch.messaging.setCurrentChannelIdName({ newId: payload.newId, newName: snapshot.data().username });
+            });
+          if (!state.messaging.savedUsernames.hasOwnProperty(payload.newId)) {
+            payload.database
+              .collection("users")
+              .doc(payload.newId)
+              .onSnapshot((snapshot) => {
+                dispatch.messaging.saveUsername({ userId: payload.newId, userName: snapshot.data().username });
+              });
+          }
+        } else if (payload.newId.length === 59) {
+          let theId = payload.newId;
+          if (theId.split(" - ")[0] === payload.user.uid) {
+            theId = theId.split(" - ")[1];
+          } else {
+            theId = theId.split(" - ")[0];
+          }
+
+          payload.database
+            .collection("users")
+            .doc(theId)
+            .get()
+            .then((snapshot) => {
+              dispatch.messaging.saveUsername({ userId: theId, userName: snapshot.data().username });
+              dispatch.messaging.setCurrentChannelIdName({ newId: theId, newName: snapshot.data().username });
+            });
+          if (!state.messaging.savedUsernames.hasOwnProperty(theId)) {
+            payload.database
+              .collection("users")
+              .doc(theId)
+              .onSnapshot((snapshot) => {
+                dispatch.messaging.saveUsername({ userId: theId, userName: snapshot.data().username });
+              });
+          }
+        } else {
+          dispatch.messaging.saveUsername({ userId: payload.newId, userName: payload.newId });
+          dispatch.messaging.setCurrentChannelIdName({ newId: payload.newId, newName: payload.newId });
+        }
+      },
+    };
+  },
+};
+
 const defaultUserInformation = {
   loggedIn: false,
 };
@@ -66,6 +146,7 @@ export const userInformation = {
 };
 
 const defaultMyProfile = {
+  friends: [],
   profilePicture: "",
   username: "",
   bio: "",
@@ -274,7 +355,15 @@ export const myProfile = {
               },
             });
 
-            dispatch.myProfile.setProfile({ username: snapshot.data().username, profilePicture: snapshot.data().pfp, bio: snapshot.data().bio, status: snapshot.data().status, colors: snapshot.data().colors, theme: theTheme });
+            dispatch.myProfile.setProfile({
+              friends: snapshot.data().friends,
+              username: snapshot.data().username,
+              profilePicture: snapshot.data().pfp,
+              bio: snapshot.data().bio,
+              status: snapshot.data().status,
+              colors: snapshot.data().colors,
+              theme: theTheme,
+            });
           });
       },
     };
