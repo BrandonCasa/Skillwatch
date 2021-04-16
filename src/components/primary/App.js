@@ -313,9 +313,10 @@ function App(props) {
   const [downloading, setDownloading] = React.useState(false);
   const [downloadProgress, setDownloadProgress] = React.useState(-100);
   const [downloadSpeed, setDownloadSpeed] = React.useState(-100);
-  const [downloadTotal, setDownloadTotal] = React.useState(-100);
-  const [downloadCurrent, setDownloadCurrent] = React.useState(-100);
+  //const [downloadTotal, setDownloadTotal] = React.useState(-100);
+  //const [downloadCurrent, setDownloadCurrent] = React.useState(-100);
   const [userSet, setUserSet] = React.useState(false);
+  const [channels, setChannels] = React.useState([]);
 
   let user = firebase.auth().currentUser;
   let db = firebase.firestore();
@@ -455,8 +456,8 @@ function App(props) {
           setDownloading(true);
           setDownloadProgress(data.percent);
           setDownloadSpeed(data.speed);
-          setDownloadTotal(data.total);
-          setDownloadCurrent(data.transferred);
+          //setDownloadTotal(data.total);
+          //setDownloadCurrent(data.transferred);
         }
         if (data === "update-downloaded") {
           setDownloadComplete(true);
@@ -575,7 +576,7 @@ function App(props) {
           </AppBar>
           <Switch>
             <Route path="/messaging">
-              <MessagingContainer checkUserExists={checkUserExists} user={user} database={db} />
+              <MessagingContainer channels={channels} setChannels={setChannels} checkUserExists={checkUserExists} user={user} database={db} />
             </Route>
             <Route path="/account/settings">
               <SettingsPageContainer user={user} database={db} />
