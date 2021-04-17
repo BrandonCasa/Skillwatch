@@ -213,18 +213,30 @@ class CurrentChannelTabPog extends React.Component {
     this.state.mounted = false;
     this.state.time = timeNow;
     this.state.messagesToLoad = -24;
+    this.state.prevTop = 0;
+  }
+  getSnapshotBeforeUpdate(prevProps, prevState) {
+    this.state.prevTop = this.chatScrollbar.current.getValues().top;
+    return;
   }
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (prevProps.currentChannelId !== this.props.currentChannelId) {
       this.setState({ messagesToLoad: 24 });
       this.chatScrollbar.current.scrollToBottom();
     }
+    if (prevProps.messages !== this.state.messages) {
+      if (this.state.prevTop >= 0.999) {
+        this.chatScrollbar.current.scrollToBottom();
+      }
+    }
   }
 
   componentDidMount() {
     if (!this.state.mounted) {
-      this.chatScrollbar.current.scrollToBottom();
-      this.setState({ mounted: true });
+      setTimeout(() => {
+        this.chatScrollbar.current.scrollToBottom();
+        this.setState({ mounted: true });
+      }, 500);
     }
   }
 
