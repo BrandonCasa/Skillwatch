@@ -3,6 +3,19 @@
   flex-direction: row;
   height: 100%;
 
+  .chatTitle {
+    display: flex;
+    flex-direction: row;
+
+    .chatSpacer {
+      width: 8px;
+    }
+
+    .chatTime {
+      color: rgba(255, 255, 255, 0.5);
+    }
+  }
+
   .CurrentChannel-Chat {
     display: flex;
     flex-direction: row;

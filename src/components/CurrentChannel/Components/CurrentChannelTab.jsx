@@ -101,6 +101,48 @@ function Message(props) {
   const [username, setUsername] = React.useState("ERROR");
   const [pfpBlob, setPfpBlob] = React.useState("");
 
+  let weekdays = new Array(7);
+  weekdays[0] = "Sunday";
+  weekdays[1] = "Monday";
+  weekdays[2] = "Tuesday";
+  weekdays[3] = "Wednesday";
+  weekdays[4] = "Thursday";
+  weekdays[5] = "Friday";
+  weekdays[6] = "Saturday";
+
+  let dateSent = new Date(props.thisMessage.time);
+  let dateCurrent = new Date(props.time);
+  let sentText = "";
+  if ((dateCurrent.getTime() - dateSent.getTime()) / 86400000 < 1) {
+    sentText = `Today at ${dateSent.toLocaleTimeString()}`;
+    if (sentText.indexOf(" AM") !== -1) {
+      sentText = sentText.replace(sentText.substring(sentText.indexOf(" AM") - 3, sentText.indexOf(" AM") + 3), " AM");
+    } else if (sentText.indexOf(" PM") !== -1) {
+      sentText = sentText.replace(sentText.substring(sentText.indexOf(" PM") - 3, sentText.indexOf(" PM") + 3), " PM");
+    }
+  } else if ((dateCurrent.getTime() - dateSent.getTime()) / 86400000 >= 1 && (dateCurrent.getTime() - dateSent.getTime()) / 86400000 < 2) {
+    sentText = `Yesterday at ${dateSent.toLocaleTimeString()}`;
+    if (sentText.indexOf(" AM") !== -1) {
+      sentText = sentText.replace(sentText.substring(sentText.indexOf(" AM") - 3, sentText.indexOf(" AM") + 3), " AM");
+    } else if (sentText.indexOf(" PM") !== -1) {
+      sentText = sentText.replace(sentText.substring(sentText.indexOf(" PM") - 3, sentText.indexOf(" PM") + 3), " PM");
+    }
+  } else if ((dateCurrent.getTime() - dateSent.getTime()) / 86400000 >= 2 && (dateCurrent.getTime() - dateSent.getTime()) / 86400000 < 7) {
+    sentText = `${weekdays[dateSent.getDay()]} at ${dateSent.toLocaleTimeString()}`;
+    if (sentText.indexOf(" AM") !== -1) {
+      sentText = sentText.replace(sentText.substring(sentText.indexOf(" AM") - 3, sentText.indexOf(" AM") + 3), " AM");
+    } else if (sentText.indexOf(" PM") !== -1) {
+      sentText = sentText.replace(sentText.substring(sentText.indexOf(" PM") - 3, sentText.indexOf(" PM") + 3), " PM");
+    }
+  } else if ((dateCurrent.getTime() - dateSent.getTime()) / 86400000 >= 7) {
+    sentText = `${dateSent.toLocaleDateString()} at ${dateSent.toLocaleTimeString()}`;
+    if (sentText.indexOf(" AM") !== -1) {
+      sentText = sentText.replace(sentText.substring(sentText.indexOf(" AM") - 3, sentText.indexOf(" AM") + 3), " AM");
+    } else if (sentText.indexOf(" PM") !== -1) {
+      sentText = sentText.replace(sentText.substring(sentText.indexOf(" PM") - 3, sentText.indexOf(" PM") + 3), " PM");
+    }
+  }
+
   props.database
     .collection("users")
     .doc(props.thisMessage.sender)
@@ -121,7 +163,14 @@ function Message(props) {
         <ListItemAvatar>
           <Avatar alt={username} src={pfpBlob} />
         </ListItemAvatar>
-        <ListItemText primary={username} secondary={<React.Fragment>{props.thisMessage.messageContent}</React.Fragment>} />
+        <ListItemText
+          primary={
+            <Typography variant="subtitle1" component="h2">
+              {username}
+            </Typography>
+          }
+          secondary={<React.Fragment>{props.thisMessage.messageContent}</React.Fragment>}
+        />
       </ListItem>
     );
   } else {
@@ -131,7 +180,20 @@ function Message(props) {
           <ListItemAvatar>
             <Avatar alt={username} src={pfpBlob} />
           </ListItemAvatar>
-          <ListItemText primary={username} secondary={<React.Fragment>{props.thisMessage.messageContent}</React.Fragment>} />
+          <ListItemText
+            primary={
+              <div className="chatTitle">
+                <Typography variant="subtitle1" component="h2">
+                  {username}
+                </Typography>
+                <div className="chatSpacer" />
+                <Typography variant="subtitle2" component="h2" className="chatTime">
+                  {sentText}
+                </Typography>
+              </div>
+            }
+            secondary={<React.Fragment>{props.thisMessage.messageContent}</React.Fragment>}
+          />
         </ListItem>
 
         <Divider variant="inset" component="li" />
@@ -150,9 +212,11 @@ class CurrentChannelTabPog extends React.Component {
     this.state = {};
     this.state.mounted = false;
     this.state.time = timeNow;
+    this.state.messagesToLoad = -24;
   }
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (prevProps.currentChannelId !== this.props.currentChannelId) {
+      this.setState({ messagesToLoad: 24 });
       this.chatScrollbar.current.scrollToBottom();
     }
   }
@@ -167,6 +231,10 @@ class CurrentChannelTabPog extends React.Component {
   sendMessage = (event) => {
     event.preventDefault();
     let shouldScroll = this.chatScrollbar.current.getValues().top === 1;
+
+    if (Math.floor(document.getElementById("scrollable").clientHeight / 73) > this.props.messages[this.props.currentChannelId].length) {
+      shouldScroll = true;
+    }
 
     var now = new Date();
     var timeNow = now.getTime();
@@ -288,7 +356,13 @@ class CurrentChannelTabPog extends React.Component {
     }
   };
 
-  handleScroll = () => {};
+  handleScroll = () => {
+    let shouldScrollUpMore = this.chatScrollbar.current.getValues().top === 0;
+    if (shouldScrollUpMore && this.state.messagesToLoad * -1 < this.props.messages[this.props.currentChannelId].length) {
+      this.setState({ messagesToLoad: this.state.messagesToLoad - 24 });
+      document.getElementById("scrollable").childNodes[0].scrollTop = 73;
+    }
+  };
 
   render() {
     return (
@@ -300,8 +374,8 @@ class CurrentChannelTabPog extends React.Component {
             <div className="CurrentChannel-ChatWindow">
               <Scrollbars className="CurrentChannel-ChatScroll" onScroll={this.handleScroll} ref={this.chatScrollbar} id="scrollable">
                 <List className="CurrentChannel-ChatList">
-                  {this.props.messages[this.props.currentChannelId].map((message, id) => {
-                    return <Message id={id} key={id} messages={this.props.messages[this.props.currentChannelId]} thisMessage={message} {...this.props} />;
+                  {this.props.messages[this.props.currentChannelId].slice(this.state.messagesToLoad).map((message, id) => {
+                    return <Message time={this.state.time} id={id} key={id} messages={this.props.messages[this.props.currentChannelId]} thisMessage={message} {...this.props} />;
                   })}
                 </List>
               </Scrollbars>
