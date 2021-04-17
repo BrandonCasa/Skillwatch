@@ -144,9 +144,12 @@ class CurrentChannelTabPog extends React.Component {
   chatScrollbar = React.createRef();
   constructor(props) {
     super(props);
+    var now = new Date();
+    var timeNow = now.getTime();
 
     this.state = {};
     this.state.mounted = false;
+    this.state.time = timeNow;
   }
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (prevProps.currentChannelId !== this.props.currentChannelId) {
@@ -154,14 +157,19 @@ class CurrentChannelTabPog extends React.Component {
     }
   }
 
-  componentDidMount() {}
-
-  setMessagesInitial = (channelId) => {};
-
-  setCurrentChannel = (newChannelId) => {};
+  componentDidMount() {
+    if (!this.state.mounted) {
+      this.chatScrollbar.current.scrollToBottom();
+      this.setState({ mounted: true });
+    }
+  }
 
   sendMessage = (event) => {
     event.preventDefault();
+    let shouldScroll = this.chatScrollbar.current.getValues().top === 1;
+
+    var now = new Date();
+    var timeNow = now.getTime();
 
     let inputBox = document.getElementById("InputBox");
     if (inputBox.value.length <= 2000 && inputBox.value.replaceAll(" ", "").length !== 0) {
@@ -175,7 +183,7 @@ class CurrentChannelTabPog extends React.Component {
           .then((snapshot) => {
             if (snapshot.exists) {
               let oldMessages = snapshot.data().messages;
-              oldMessages.push({ channel: this.props.currentChannelId, messageContent: inputBox.value, sender: this.props.user.uid });
+              oldMessages.push({ channel: this.props.currentChannelId, messageContent: inputBox.value, sender: this.props.user.uid, time: timeNow });
               this.props.database
                 .collection("chatChannels")
                 .doc(this.props.currentChannelId)
@@ -185,6 +193,9 @@ class CurrentChannelTabPog extends React.Component {
                 .then(() => {
                   console.log(`Successfully sent message.`);
                   inputBox.value = "";
+                  if (shouldScroll) {
+                    this.chatScrollbar.current.scrollToBottom();
+                  }
                 });
             }
           });
@@ -199,7 +210,7 @@ class CurrentChannelTabPog extends React.Component {
               .then((snapshot) => {
                 if (snapshot.exists) {
                   let oldMessages = snapshot.data().messages;
-                  oldMessages.push({ channel: this.props.currentChannelId, messageContent: inputBox.value, sender: this.props.user.uid });
+                  oldMessages.push({ channel: this.props.currentChannelId, messageContent: inputBox.value, sender: this.props.user.uid, time: timeNow });
                   this.props.database
                     .collection("chatChannels")
                     .doc(`${this.props.user.uid} - ${this.props.currentChannelId}`)
@@ -209,6 +220,9 @@ class CurrentChannelTabPog extends React.Component {
                     .then(() => {
                       console.log(`Successfully sent message.`);
                       inputBox.value = "";
+                      if (shouldScroll) {
+                        this.chatScrollbar.current.scrollToBottom();
+                      }
                     });
                 }
               });
@@ -224,7 +238,7 @@ class CurrentChannelTabPog extends React.Component {
                   .then((snapshot) => {
                     if (snapshot.exists) {
                       let oldMessages = snapshot.data().messages;
-                      oldMessages.push({ channel: this.props.currentChannelId, messageContent: inputBox.value, sender: this.props.user.uid });
+                      oldMessages.push({ channel: this.props.currentChannelId, messageContent: inputBox.value, sender: this.props.user.uid, time: timeNow });
                       this.props.database
                         .collection("chatChannels")
                         .doc(`${this.props.currentChannelId} - ${this.props.user.uid}`)
@@ -234,6 +248,9 @@ class CurrentChannelTabPog extends React.Component {
                         .then(() => {
                           console.log(`Successfully sent message.`);
                           inputBox.value = "";
+                          if (shouldScroll) {
+                            this.chatScrollbar.current.scrollToBottom();
+                          }
                         });
                     }
                   });
@@ -247,7 +264,7 @@ class CurrentChannelTabPog extends React.Component {
                   .then((snapshot) => {
                     if (snapshot.exists) {
                       let oldMessages = snapshot.data().messages;
-                      oldMessages.push({ channel: this.props.currentChannelId, messageContent: inputBox.value, sender: this.props.user.uid });
+                      oldMessages.push({ channel: this.props.currentChannelId, messageContent: inputBox.value, sender: this.props.user.uid, time: timeNow });
                       this.props.database
                         .collection("chatChannels")
                         .doc(`${this.props.user.uid} - ${this.props.currentChannelId}`)
@@ -257,6 +274,9 @@ class CurrentChannelTabPog extends React.Component {
                         .then(() => {
                           console.log(`Successfully sent message.`);
                           inputBox.value = "";
+                          if (shouldScroll) {
+                            this.chatScrollbar.current.scrollToBottom();
+                          }
                         });
                     }
                   });

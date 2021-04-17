@@ -106,7 +106,7 @@ export const messaging = {
                   .get()
                   .then((chatSnapshot) => {
                     dispatch.messaging.setMessages({ channelId: payload.newId, newMessages: chatSnapshot.data().messages });
-                    dispatch.messaging.setCurrentChannelIdName({ newId: payload.newId, newName: payload.newId });
+                    dispatch.messaging.setCurrentChannelIdName({ newId: payload.newId, newName: state.messaging.savedUsernames[payload.newId] });
                     payload.callback();
                   });
                 payload.database
@@ -126,7 +126,7 @@ export const messaging = {
                       .get()
                       .then((chatSnapshot) => {
                         dispatch.messaging.setMessages({ channelId: payload.newId, newMessages: chatSnapshot.data().messages });
-                        dispatch.messaging.setCurrentChannelIdName({ newId: payload.newId, newName: payload.newId });
+                        dispatch.messaging.setCurrentChannelIdName({ newId: payload.newId, newName: state.messaging.savedUsernames[payload.newId] });
                         payload.callback();
                       });
                     payload.database
@@ -144,7 +144,7 @@ export const messaging = {
                       .get()
                       .then((chatSnapshot) => {
                         dispatch.messaging.setMessages({ channelId: payload.newId, newMessages: chatSnapshot.data().messages });
-                        dispatch.messaging.setCurrentChannelIdName({ newId: payload.newId, newName: payload.newId });
+                        dispatch.messaging.setCurrentChannelIdName({ newId: payload.newId, newName: state.messaging.savedUsernames[payload.newId] });
                         payload.callback();
                       });
                     payload.database
@@ -182,68 +182,74 @@ export const messaging = {
               .onSnapshot((snapshot) => {
                 dispatch.messaging.saveUsername({ userId: theId, userName: snapshot.data().username });
               });
-            let docRefA = payload.database.collection("chatChannels").doc(`${payload.user.uid} - ${theId}`);
-            let docRefB = payload.database.collection("chatChannels").doc(`${theId} - ${payload.user.uid}`);
-            docRefA.get().then((docA) => {
-              if (docA.exists) {
-                // If `${props.user.uid} - ${friendId}` DOES exist
-                payload.database
-                  .collection("chatChannels")
-                  .doc(`${payload.user.uid} - ${theId}`)
-                  .get()
-                  .then((chatSnapshot) => {
-                    dispatch.messaging.setMessages({ channelId: theId, newMessages: chatSnapshot.data().messages });
-                    dispatch.messaging.setCurrentChannelIdName({ newId: theId, newName: theId });
-                    payload.callback();
-                  });
-                payload.database
-                  .collection("chatChannels")
-                  .doc(`${payload.user.uid} - ${theId}`)
-                  .onSnapshot((chatSnapshot) => {
-                    dispatch.messaging.setMessages({ channelId: theId, newMessages: chatSnapshot.data().messages });
-                  });
-              } else {
-                // If `${props.user.uid} - ${friendId}` DOES NOT exist
-                docRefB.get().then((docB) => {
-                  if (docB.exists) {
-                    // If `${friendId} - ${props.user.uid}` DOES exist
+            payload.database
+              .collection("users")
+              .doc(theId)
+              .get()
+              .then((snapshot) => {
+                let docRefA = payload.database.collection("chatChannels").doc(`${payload.user.uid} - ${theId}`);
+                let docRefB = payload.database.collection("chatChannels").doc(`${theId} - ${payload.user.uid}`);
+                docRefA.get().then((docA) => {
+                  if (docA.exists) {
+                    // If `${props.user.uid} - ${friendId}` DOES exist
                     payload.database
                       .collection("chatChannels")
-                      .doc(`${theId} - ${payload.user.uid}`)
+                      .doc(`${payload.user.uid} - ${theId}`)
                       .get()
                       .then((chatSnapshot) => {
                         dispatch.messaging.setMessages({ channelId: theId, newMessages: chatSnapshot.data().messages });
-                        dispatch.messaging.setCurrentChannelIdName({ newId: theId, newName: theId });
+                        dispatch.messaging.setCurrentChannelIdName({ newId: theId, newName: snapshot.data().username });
                         payload.callback();
                       });
                     payload.database
                       .collection("chatChannels")
-                      .doc(`${theId} - ${payload.user.uid}`)
+                      .doc(`${payload.user.uid} - ${theId}`)
                       .onSnapshot((chatSnapshot) => {
                         dispatch.messaging.setMessages({ channelId: theId, newMessages: chatSnapshot.data().messages });
                       });
                   } else {
-                    // If `${friendId} - ${props.user.uid}` DOES NOT exist
-                    payload.database.collection("chatChannels").doc(`${payload.user.uid} - ${theId}`).set({ messages: [] });
-                    payload.database
-                      .collection("chatChannels")
-                      .doc(`${payload.user.uid} - ${theId}`)
-                      .get()
-                      .then((chatSnapshot) => {
-                        dispatch.messaging.setMessages({ channelId: theId, newMessages: chatSnapshot.data().messages });
-                        dispatch.messaging.setCurrentChannelIdName({ newId: theId, newName: theId });
-                        payload.callback();
-                      });
-                    payload.database
-                      .collection("chatChannels")
-                      .doc(`${payload.user.uid} - ${theId}`)
-                      .onSnapshot((chatSnapshot) => {
-                        dispatch.messaging.setMessages({ channelId: theId, newMessages: chatSnapshot.data().messages });
-                      });
+                    // If `${props.user.uid} - ${friendId}` DOES NOT exist
+                    docRefB.get().then((docB) => {
+                      if (docB.exists) {
+                        // If `${friendId} - ${props.user.uid}` DOES exist
+                        payload.database
+                          .collection("chatChannels")
+                          .doc(`${theId} - ${payload.user.uid}`)
+                          .get()
+                          .then((chatSnapshot) => {
+                            dispatch.messaging.setMessages({ channelId: theId, newMessages: chatSnapshot.data().messages });
+                            dispatch.messaging.setCurrentChannelIdName({ newId: theId, newName: snapshot.data().username });
+                            payload.callback();
+                          });
+                        payload.database
+                          .collection("chatChannels")
+                          .doc(`${theId} - ${payload.user.uid}`)
+                          .onSnapshot((chatSnapshot) => {
+                            dispatch.messaging.setMessages({ channelId: theId, newMessages: chatSnapshot.data().messages });
+                          });
+                      } else {
+                        // If `${friendId} - ${props.user.uid}` DOES NOT exist
+                        payload.database.collection("chatChannels").doc(`${payload.user.uid} - ${theId}`).set({ messages: [] });
+                        payload.database
+                          .collection("chatChannels")
+                          .doc(`${payload.user.uid} - ${theId}`)
+                          .get()
+                          .then((chatSnapshot) => {
+                            dispatch.messaging.setMessages({ channelId: theId, newMessages: chatSnapshot.data().messages });
+                            dispatch.messaging.setCurrentChannelIdName({ newId: theId, newName: snapshot.data().username });
+                            payload.callback();
+                          });
+                        payload.database
+                          .collection("chatChannels")
+                          .doc(`${payload.user.uid} - ${theId}`)
+                          .onSnapshot((chatSnapshot) => {
+                            dispatch.messaging.setMessages({ channelId: theId, newMessages: chatSnapshot.data().messages });
+                          });
+                      }
+                    });
                   }
                 });
-              }
-            });
+              });
           } else {
             payload.database
               .collection("users")
