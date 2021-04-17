@@ -55,27 +55,16 @@ function Messaging(props) {
             </ListItemIcon>
             <ListItemText primary={"Home"} />
           </ListItem>
-          <ListItem
-            button
-            key={"Messaging"}
-            disabled={true}
-            component={Link}
-            to="/messaging"
-          >
+          <ListItem button key={"Social"} disabled={true} component={Link} to="/social">
             <ListItemIcon>
               <GroupIcon />
             </ListItemIcon>
-            <ListItemText primary={"Messaging"} />
+            <ListItemText primary={"Social"} />
           </ListItem>
         </List>
         <Divider />
         <List>
-          <ListItem
-            button
-            key={"Profile"}
-            component={Link}
-            to="/account/profile"
-          >
+          <ListItem button key={"Profile"} component={Link} to="/account/profile">
             <ListItemIcon>
               <AccountCircleIcon />
             </ListItemIcon>
@@ -88,11 +77,7 @@ function Messaging(props) {
           "Messaging-ContentClosed": !props.primaryDrawerOpen,
         })}
       >
-        {props.loggedIn ? (
-          <LoggedIn {...props} />
-        ) : (
-          "Please Login to use messaging"
-        )}
+        {props.loggedIn ? <LoggedIn {...props} /> : "Please Login to use messaging"}
       </div>
     </div>
   );

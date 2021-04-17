@@ -185,11 +185,11 @@ function Profile(props) {
             </ListItemIcon>
             <ListItemText primary={"Home"} />
           </ListItem>
-          <ListItem button key={"Messaging"} component={Link} to="/messaging">
+          <ListItem button key={"Social"} component={Link} to="/social">
             <ListItemIcon>
               <GroupIcon />
             </ListItemIcon>
-            <ListItemText primary={"Messaging"} />
+            <ListItemText primary={"Social"} />
           </ListItem>
         </List>
         <Divider />

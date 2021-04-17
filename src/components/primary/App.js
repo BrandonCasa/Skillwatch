@@ -576,7 +576,7 @@ function App(props) {
             </Toolbar>
           </AppBar>
           <Switch>
-            <Route path="/messaging">
+            <Route path="/social">
               <MessagingContainer channels={channels} setChannels={setChannels} checkUserExists={checkUserExists} user={user} database={db} />
             </Route>
             <Route path="/account/settings">
